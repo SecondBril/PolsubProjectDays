@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\UsersImport;
 use App\Models\User;
 use App\Models\Program; // Pastikan model Program diimpor untuk dropdown form
 use Illuminate\Http\Request;
@@ -108,5 +109,28 @@ class UserController extends Controller
     {
         $user->delete();
         return back()->with('success', 'Akun pendaftaran ditolak dan data telah dihapus.');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        try {
+            $import = new UsersImport();
+
+            // PERBAIKAN: Gunakan Facade Excel untuk mengeksekusi import
+            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
+
+            // Jika ada baris yang gagal validasi (ditangkap oleh onFailure/onError)
+            if (!empty($import->customErrors)) {
+                return back()->with('import_errors', $import->customErrors)->withInput();
+            }
+
+            return back()->with('success', 'Data user berhasil diimpor dari Excel dan role Spatie tersinkronisasi.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat membaca file: ' . $e->getMessage())->withInput();
+        }
     }
 }

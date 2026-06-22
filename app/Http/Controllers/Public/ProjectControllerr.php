@@ -15,14 +15,15 @@ class ProjectControllerr extends Controller
 {
     public function index(Request $request)
     {
-        // Query index tetap aman karena tidak memanggil relasi dosen di list kartu awal
+        // REVISI: Tambahkan eager loading 'features' pada query index halaman publik
         $query = Project::published()
-            ->with(['program', 'category', 'courseClass.semester', 'teamMembers']);
+            ->with(['program', 'category', 'courseClass.semester', 'teamMembers', 'features']);
 
         if ($request->filled('search')) {
             $query->search($request->input('search'));
         }
 
+        // ... Sisa kode filter, sorting, dan pagination tetap sama ...
         if ($request->filled('program_id')) {
             $query->where('program_id', $request->input('program_id'));
         }
@@ -67,7 +68,7 @@ class ProjectControllerr extends Controller
     }
 
     /**
-     * DETAIL PROJECT
+     * DETAIL PROJECT (PUBLIC)
      */
     public function show(string $slug)
     {
@@ -78,12 +79,10 @@ class ProjectControllerr extends Controller
                 'category',
                 'courseClass.semester',
                 'courseClass.course',
-
-                // PERBAIKAN DI SINI: Ubah dari 'courseClass.lecturer' menjadi 'courseClass.lecturers'
                 'courseClass.lecturers',
-
                 'tags',
                 'teamMembers.program',
+                'features' // REVISI: Pastikan detail proyek memuat relasi features
             ])
             ->firstOrFail();
 

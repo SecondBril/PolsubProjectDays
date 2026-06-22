@@ -48,24 +48,105 @@
                 </div>
             </div>
 
-            {{-- Relasi Kelompok --}}
+            {{-- REVISI KELOMPOK & KONTRIBUSI TIM --}}
             <div class="bg-panel border border-slate-200 rounded-admin-md p-5 shadow-admin-sm space-y-4">
-                <h3 class="text-xs font-bold text-textCustom-900 uppercase tracking-wider border-b border-slate-100 pb-2">2. Komposisi Tim Pengembang</h3>
+                <h3 class="text-xs font-bold text-textCustom-900 uppercase tracking-wider border-b border-slate-100 pb-2">2. Komposisi Tim Pengembang & Kontribusi</h3>
 
                 <div>
                     <label class="block text-xs font-semibold text-textCustom-700 mb-1.5">Nama Kelompok / Nama Tim</label>
                     <input type="text" name="team_name" value="{{ old('team_name', $project->team_name) }}" class="w-full text-xs rounded-lg border border-slate-200 p-[9.5px_12px] outline-none focus:border-teal-500 text-textCustom-900 bg-white">
                 </div>
 
-                @livewire('team-lead-picker', ['oldLeadId' => $project->team_lead_id])
+                {{-- Picker Ketua Kelompok dengan Tampilan Kontribusi Lama --}}
+                @livewire('team-lead-picker', ['oldLeadId' => $project->team_lead_id, 'project' => $project])
 
-                {{-- Sediakan value $project ke Livewire picker untuk inisialisasi data edit anggota --}}
-                @livewire('team-member-picker', ['project' => $project])
+                {{-- Picker Anggota Kelompok Mengikat Array Livewire --}}
+                @php
+                    $prefilledMembers = $project->teamMembers->where('id', '!=', $project->team_lead_id)->map(function($m) {
+                        return [
+                            'id' => $m->id,
+                            'name' => $m->name,
+                            'nim_nidn' => $m->nim_nidn,
+                            'contribution' => $m->pivot->contribution
+                        ];
+                    })->toArray();
+                @endphp
+                @livewire('team-member-picker', ['selectedMembers' => $prefilledMembers])
+            </div>
+
+            {{-- REVISI INDEPENDEN: KOMPONEN EDIT UTAMA DAFTAR FITUR APLIKASI (ALPINJS) --}}
+            <div class="bg-panel border border-slate-200 rounded-admin-md p-5 shadow-admin-sm space-y-4" x-data="{
+                features: {{ json_encode(old('features', $project->features->map(fn($f) => ['name' => $f->name, 'icon' => $f->icon])->toArray())) }} || [],
+                iconSearch: '',
+                activePickerIndex: null,
+                fontAwesomeIcons: {{ json_encode($fontAwesomeIcons) }},
+                addFeature() {
+                    this.features.push({ name: '', icon: 'fa-solid fa-cube' });
+                },
+                removeFeature(index) {
+                    this.features.splice(index, 1);
+                },
+                get filteredIcons() {
+                    if (!this.iconSearch) return this.fontAwesomeIcons;
+                    return this.fontAwesomeIcons.filter(icon => icon.toLowerCase().includes(this.iconSearch.toLowerCase()));
+                }
+            }">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <h3 class="text-xs font-bold text-textCustom-900 uppercase tracking-wider">3. Fitur Utama Sistem Aplikasi</h3>
+                    <button type="button" @click="addFeature()" class="inline-flex items-center gap-1 px-2.5 py-1 bg-navy-900 hover:bg-navy-800 text-white text-[11px] font-bold rounded-md transition shadow-sm">
+                        <i class="fa-solid fa-plus"></i> Tambah Baris Fitur
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <template x-for="(feature, index) in features" :key="index">
+                        <div class="flex items-start gap-3 bg-surface p-3 rounded-xl border border-slate-200/60 relative">
+
+                            {{-- Input Deskripsi Modul Fitur --}}
+                            <div class="flex-1">
+                                <label class="block text-[10px] font-bold text-textCustom-400 uppercase mb-1" x-text="`Nama Fitur Unggulan #${index + 1}`"></label>
+                                <input type="text" :name="`features[${index}][name]`" x-model="feature.name" required class="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 text-textCustom-900 focus:outline-none focus:border-teal-500 bg-white">
+                            </div>
+
+                            {{-- Font Awesome Picker Panel --}}
+                            <div class="w-40 relative">
+                                <label class="block text-[10px] font-bold text-textCustom-400 uppercase mb-1">Visual Ikon</label>
+                                <button type="button" @click="activePickerIndex = (activePickerIndex === index ? null : index); iconSearch = ''" class="w-full flex items-center justify-between gap-2 text-xs rounded-lg border border-slate-200 px-3 py-2 text-textCustom-900 bg-white hover:bg-slate-50 text-left outline-none">
+                                    <span class="flex items-center gap-2 truncate">
+                                        <i :class="feature.icon || 'fa-solid fa-cube'" class="text-indigo-600 text-sm"></i>
+                                        <span x-text="feature.icon ? feature.icon.replace('fa-solid ', '') : 'Pilih Ikon'"></span>
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down text-[10px] text-textCustom-400"></i>
+                                </button>
+
+                                <input type="hidden" :name="`features[${index}][icon]`" x-model="feature.icon">
+
+                                <div class="absolute right-0 mt-1 w-64 bg-white border border-slate-200 rounded-xl shadow-xl z-30 p-3 space-y-2" x-show="activePickerIndex === index" @click.away="activePickerIndex = null" x-transition style="display: none;">
+                                    <input type="text" x-model="iconSearch" placeholder="Cari ikon..." class="w-full text-[11px] rounded-md border border-slate-200 px-2.5 py-1.5 text-textCustom-900 outline-none focus:border-teal-500">
+                                    <div class="grid grid-cols-5 gap-1.5 max-h-32 overflow-y-auto p-0.5">
+                                        <template x-for="icon in filteredIcons" :key="icon">
+                                            <button type="button" @click="feature.icon = icon; activePickerIndex = null" :class="feature.icon === icon ? 'bg-teal-500 text-white' : 'bg-slate-50 text-textCustom-700'" class="p-2 text-center rounded-md border transition flex items-center justify-center text-sm">
+                                                <i :class="icon"></i>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Tombol Eliminasi Baris --}}
+                            <div class="pt-5">
+                                <button type="button" @click="removeFeature(index)" class="p-2 bg-rose-50 border border-rose-100 text-rose-600 rounded-lg hover:bg-rose-600 hover:text-white transition-all">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
 
             {{-- Media Files Management --}}
             <div class="bg-panel border border-slate-200 rounded-admin-md p-5 shadow-admin-sm space-y-4">
-                <h3 class="text-xs font-bold text-textCustom-900 uppercase tracking-wider border-b border-slate-100 pb-2">3. Perbarui Media File</h3>
+                <h3 class="text-xs font-bold text-textCustom-900 uppercase tracking-wider border-b border-slate-100 pb-2">4. Perbarui Media File</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>

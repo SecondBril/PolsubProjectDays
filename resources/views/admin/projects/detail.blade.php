@@ -64,6 +64,26 @@
                 </div>
             </div>
 
+            {{-- REVISI 1: KOMPONEN LIST DAFTAR FITUR UTAMA APLIKASI --}}
+            <div class="bg-panel border border-slate-200 rounded-admin-md p-6 shadow-admin-sm">
+                <h2 class="text-sm font-bold text-textCustom-900 border-b border-slate-100 pb-3 mb-4">Fitur Unggulan Sistem Perangkat Lunak</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    @forelse($project->features->sortBy('order') as $feature)
+                        <div class="flex items-start gap-3.5 p-3.5 border border-slate-150 rounded-xl bg-surface shadow-sm">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-sm shrink-0">
+                                <i class="{{ $feature->icon ?? 'fa-solid fa-cube' }}"></i>
+                            </div>
+                            <div class="min-w-0 flex-1 pt-0.5">
+                                <span class="text-xs font-bold text-textCustom-900 block leading-tight mb-0.5">Fitur #{{ $loop->iteration }}</span>
+                                <p class="text-[12.5px] text-textCustom-600 leading-relaxed">{{ $feature->name }}</p>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-xs text-textCustom-400 italic col-span-full py-2">Kelompok belum mendaftarkan fitur/modul utama aplikasi.</p>
+                    @endforelse
+                </div>
+            </div>
+
             {{-- Komponen Link Eksternal Asset --}}
             <div class="bg-panel border border-slate-200 rounded-admin-md p-6 shadow-admin-sm">
                 <h2 class="text-sm font-bold text-textCustom-900 border-b border-slate-100 pb-3 mb-4">Tautan Berkas & Aset Proyek</h2>
@@ -100,19 +120,40 @@
                 </div>
             </div>
 
-            {{-- Tim Pengembang & Anggota --}}
+            {{-- REVISI 2: TIM PENGEMBANG & DETAIL KONTRIBUSI INDIVIDU --}}
             <div class="bg-panel border border-slate-200 rounded-admin-md p-6 shadow-admin-sm">
-                <h2 class="text-sm font-bold text-textCustom-900 border-b border-slate-100 pb-3 mb-4">Struktur Anggota Tim Pengembang</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <h2 class="text-sm font-bold text-textCustom-900 border-b border-slate-100 pb-3 mb-4">Struktur Anggota Tim Pengembang & Kontribusi</h2>
+                <div class="mb-3">
+                    <span class="text-xs font-semibold text-textCustom-400 block mb-1">Nama Tim/Kelompok</span>
+                    <p class="text-[13.5px] text-textCustom-900 leading-relaxed bg-surface border border-slate-100 p-3 rounded-lg">{{ $project->team_name ?? 'Tidak ada' }}</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @forelse($project->teamMembers as $member)
-                        <div class="border border-slate-150 rounded-xl p-3 flex items-center gap-3 bg-surface">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($member->name) }}&background=F1F5F9&color=0F172A" class="w-10 h-10 rounded-full object-cover shrink-0" alt="Avatar">
-                            <div class="min-w-0 flex-1">
-                                <div class="text-xs font-bold text-textCustom-900 truncate">{{ $member->name }}</div>
-                                <div class="text-[11px] text-textCustom-400 font-mono mt-0.5">{{ $member->nim_nidn }}</div>
-                                <span class="inline-block mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white border border-slate-200 text-textCustom-600">
-                                    {{ $member->pivot->role ?? ($project->team_lead_id === $member->id ? 'Ketua Tim' : 'Developer') }}
-                                </span>
+                        <div class="border border-slate-150 rounded-xl p-4 flex flex-col justify-between bg-surface shadow-sm transition hover:shadow">
+                            <div class="flex items-start gap-3">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($member->name) }}&background=F1F5F9&color=0F172A" class="w-11 h-11 rounded-full object-cover shrink-0 border border-slate-100" alt="Avatar">
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-xs font-extrabold text-textCustom-900 truncate leading-tight">{{ $member->name }}</div>
+                                    <div class="text-[10px] text-textCustom-400 font-mono mt-0.5">{{ $member->nim_nidn }}</div>
+
+                                    <div class="mt-2">
+                                        <span @class([
+                                            'text-[9px] font-bold px-2 py-0.5 rounded border tracking-wide uppercase',
+                                            'bg-indigo-50 border-indigo-200/60 text-indigo-700' => (($member->pivot->role ?? '') === 'ketua' || $project->team_lead_id === $member->id),
+                                            'bg-slate-50 border-slate-200 text-textCustom-600' => (($member->pivot->role ?? '') !== 'ketua' && $project->team_lead_id !== $member->id)
+                                        ])>
+                                            {{ ($member->pivot->role ?? '') === 'ketua' || $project->team_lead_id === $member->id ? 'Ketua Tim' : 'Anggota Developer' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Area Cetak Teks Kontribusi Kerja Tugas Mandiri --}}
+                            <div class="mt-3.5 pt-3.5 border-t border-slate-100">
+                                <span class="text-[10px] font-bold text-textCustom-400 uppercase tracking-wide block mb-1">Tugas / Kontribusi Kerja:</span>
+                                <p class="text-[12px] text-textCustom-700 font-medium leading-relaxed bg-slate-50/50 p-2.5 rounded-lg border border-slate-100 min-h-[50px]">
+                                    {{ $member->pivot->contribution ?? 'Tidak ada rincian deskripsi tugas mandiri yang dilampirkan.' }}
+                                </p>
                             </div>
                         </div>
                     @empty
@@ -174,11 +215,11 @@
 
                 <dl class="space-y-3.5 text-xs">
                     <div>
-                        <dt class="text-textCustom-400 font-medium">Nama Kelompok / Tim</dt>
+                        <span class="text-textCustom-400 font-medium">Nama Kelompok / Tim</span>
                         <dd class="mt-0.5 font-bold text-textCustom-900">{{ $project->team_name ?? 'Individual' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-textCustom-400 font-medium">Dosen Pembimbing / Pengampu</dt>
+                        <span class="text-textCustom-400 font-medium">Dosen Pembimbing / Pengampu</span>
                         <dd class="mt-1.5 flex flex-wrap gap-1.5">
                             @if($project->courseClass && $project->courseClass->lecturers->isNotEmpty())
                                 @foreach($project->courseClass->lecturers as $lecturer)
@@ -193,19 +234,19 @@
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-textCustom-400 font-medium">Mata Kuliah Konteks</dt>
+                        <span class="text-textCustom-400 font-medium">Mata Kuliah Konteks</span>
                         <dd class="mt-0.5 font-bold text-textCustom-900">{{ $project->courseClass?->course?->name ?? 'N/A' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-textCustom-400 font-medium">Program Studi</dt>
+                        <span class="text-textCustom-400 font-medium">Program Studi</span>
                         <dd class="mt-0.5 font-bold text-textCustom-900">{{ $project->program?->name ?? 'N/A' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-textCustom-400 font-medium">Kategori Rumpun Ilmu</dt>
+                        <span class="text-textCustom-400 font-medium">Kategori Rumpun Ilmu</span>
                         <dd class="mt-0.5 font-bold text-textCustom-900">{{ $project->category?->name ?? 'N/A' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-textCustom-400 font-medium">Angkatan (Cohort) / Semester</dt>
+                        <span class="text-textCustom-400 font-medium">Angkatan (Cohort) / Semester</span>
                         <dd class="mt-0.5 font-bold text-textCustom-900">Angkatan {{ $project->cohort ?? '-' }} — {{ $project->courseClass?->semester?->name ?? '-' }}</dd>
                     </div>
                 </dl>

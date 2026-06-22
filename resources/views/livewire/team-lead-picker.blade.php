@@ -1,4 +1,4 @@
-<div class="relative">
+<div class="relative space-y-2">
     <label class="block text-xs font-semibold text-slate-700 mb-1.5">
         Ketua Kelompok (Mahasiswa) <span class="text-rose-500">*</span>
     </label>
@@ -8,14 +8,29 @@
 
     @if($selectedLeadId)
         {{-- Tampilan saat Ketua sudah terpilih --}}
-        <div class="flex items-center justify-between p-2.5 bg-indigo-50 border border-indigo-200 rounded-lg text-xs">
-            <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-200 text-indigo-700">Ketua</span>
-                <span class="text-slate-900 font-medium">{{ $selectedLeadNim }} - {{ $selectedLeadName }}</span>
+        <div class="space-y-2">
+            <div class="flex items-center justify-between p-2.5 bg-indigo-50 border border-indigo-200 rounded-lg text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-200 text-indigo-700">Ketua</span>
+                    <span class="text-slate-900 font-medium">{{ $selectedLeadNim }} - {{ $selectedLeadName }}</span>
+                </div>
+                <button type="button" wire:click="removeLead" class="text-rose-500 hover:text-rose-700 font-bold text-sm px-1">
+                    &times;
+                </button>
             </div>
-            <button type="button" wire:click="removeLead" class="text-rose-500 hover:text-rose-700 font-bold text-sm px-1">
-                &times;
-            </button>
+
+            {{-- PERBAIKAN: Input Kontribusi Tunggal Terintegrasi --}}
+            <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl shadow-sm">
+                <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1.5 tracking-wider">
+                    Kontribusi Ketua Kelompok <span class="text-rose-500">*</span>
+                </label>
+                <input type="text"
+                       name="leader_contribution"
+                       wire:model="leaderContribution"
+                       required
+                       placeholder="Contoh: Project Manager, Analisis Kebutuhan Sistem, dan Deploy Cloud..."
+                       class="w-full text-xs rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 outline-none shadow-inner transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+            </div>
         </div>
     @else
         {{-- Input pencarian saat Ketua belum dipilih --}}

@@ -31,7 +31,7 @@
                 @endif
             </a>
 
-            <a href="#" @class([
+            <a href="/about" @class([
                 'relative py-1.5 transition-colors duration-150 outline-none',
                 'text-navy-900 font-bold' => request()->is('about'),
                 'hover:text-navy-900' => !request()->is('about')
@@ -136,7 +136,7 @@
                 'text-slate-600 hover:bg-slate-50/50 hover:text-slate-900' => !request()->routeIs('project*')
             ])>Projects</a>
 
-            <a href="#" @class([
+            <a href="/about" @class([
                 'block py-2 px-3 rounded-lg text-xs font-semibold transition-colors',
                 'bg-slate-50 text-navy-900 font-bold' => request()->is('about'),
                 'text-slate-600 hover:bg-slate-50/50 hover:text-slate-900' => !request()->is('about')

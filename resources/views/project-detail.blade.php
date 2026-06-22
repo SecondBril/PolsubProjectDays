@@ -38,7 +38,7 @@
                     {{ $project->title }}
                 </h1>
                 <p class="mt-2 text-sm font-medium text-white/60 sm:text-base">
-                    {{ $project->team_name ?? 'Tim Developer' }} &mdash; Angkatan {{ $project->cohort ?? '2024' }}
+                    {{ $project->team_name ?? 'Tim Developer' }} &mdash; Angkatan {{ $project->cohort ?? '2026' }}
                 </p>
 
                 <div class="mt-6 flex flex-wrap gap-3">
@@ -90,17 +90,19 @@
                             <img src="https://s0.wp.com/mshots/v1/{{ urlencode($project->demo_url) }}?w=1000"
                                 class="w-full h-auto object-cover opacity-90 hover:opacity-100 transition max-h-[400px]"
                                 loading="lazy"
-                                onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';"
+                                id="demoPreviewImg"
+                                onerror="this.onerror=null;this.style.display='none';document.getElementById('fallbackDemoContainer').style.display='flex';"
                                 alt="Live Demo Preview - {{ $project->title ?? 'Project' }}">
 
                             {{-- Fallback kalau screenshot gagal di-generate --}}
-                            <div class="hidden w-full h-[300px] flex-col items-center justify-center text-slate-400 gap-2">
+                            <div id="fallbackDemoContainer" class="hidden w-full h-[300px] flex-col items-center justify-center text-slate-400 gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="12" rx="2"/><path stroke-linecap="round" d="M8 20h8M12 16v4"/></svg>
                                 <p class="text-sm">Preview belum tersedia, lihat langsung di demo</p>
                             </div>
                         </div>
                     </div>
                 @endif
+
                 <div>
                     <h2 class="text-xl font-bold text-navy-900">Tentang Project</h2>
                     <div class="mt-3 text-justify leading-relaxed text-slate-600 space-y-4">
@@ -108,21 +110,23 @@
                     </div>
                 </div>
 
+                {{-- REVISI 1: TAMPILAN FITUR DINAMIS BERDASARKAN DATABASE --}}
                 <div>
                     <h2 class="text-xl font-bold text-navy-900">Fitur Utama</h2>
                     <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div class="card flex flex-col items-center gap-3 px-4 py-6 text-center">
-                            <span class="text-navy-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19V9m6 10V5m6 14v-7"/></svg></span>
-                            <p class="font-semibold text-navy-900 text-sm">Real-time Monitoring</p>
-                        </div>
-                        <div class="card flex flex-col items-center gap-3 px-4 py-6 text-center">
-                            <span class="text-navy-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 17l5-5 4 4 8-8m0 0h-5m5 0v5"/></svg></span>
-                            <p class="font-semibold text-navy-900 text-sm">Predictive Analytics</p>
-                        </div>
-                        <div class="card flex flex-col items-center gap-3 px-4 py-6 text-center">
-                            <span class="text-navy-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3s6 6.5 6 10.5a6 6 0 11-12 0C6 9.5 12 3 12 3z"/></svg></span>
-                            <p class="font-semibold text-navy-900 text-sm">Automated Systems</p>
-                        </div>
+                        @forelse($project->features->sortBy('order') as $feature)
+                            <div class="card flex flex-col items-center gap-3 px-4 py-6 text-center bg-white rounded-xl border border-slate-100 shadow-sm">
+                                <span class="text-navy-700">
+                                    {{-- Merender class ikon dari database secara dinamis dengan ukuran setara hardcode --}}
+                                    <i class="{{ $feature->icon ?? 'fa-solid fa-cube' }} h-7 w-7 text-xl flex items-center justify-center"></i>
+                                </span>
+                                <p class="font-semibold text-navy-900 text-sm leading-snug">{{ $feature->name }}</p>
+                            </div>
+                        @empty
+                            <div class="col-span-full py-6 text-center text-sm text-slate-400 italic bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                                Belum ada rincian modul fitur utama yang didaftarkan pada proyek ini.
+                            </div>
+                        @endforelse
                     </div>
                 </div>
 
@@ -131,7 +135,7 @@
                         <h2 class="text-xl font-bold text-navy-900">Tech Stack</h2>
                         <div class="mt-4 flex flex-wrap gap-2">
                             @foreach($project->tags as $tag)
-                                <span class="rounded-full bg-slate-100 px-4 py-1.5 text-xs font-medium text-slate-600">
+                                <span class="rounded-full bg-slate-100 px-4 py-1.5 text-xs font-medium text-slate-600 border border-slate-200/50">
                                     {{ $tag->name }}
                                 </span>
                             @endforeach
@@ -139,22 +143,42 @@
                     </div>
                 @endif
 
+                {{-- REVISI 2: TAMPILAN STRUKTUR ANGGOTA TIM & RINCIAN KONTRIBUSI --}}
                 <div>
-                    <h2 class="text-xl font-bold text-navy-900">Anggota Tim</h2>
-                    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <h2 class="text-xl font-bold text-navy-900">Struktur Anggota Tim & Kontribusi</h2>
+                    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         @forelse($project->teamMembers as $member)
-                            <div class="card flex flex-col items-center gap-2 px-4 py-6 text-center">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($member->name) }}&background=E2E8F0&color=1E293B"
-                                     class="h-16 w-16 rounded-full ring-2 ring-navy-100 object-cover"
-                                     alt="{{ $member->name }}">
-                                <p class="font-bold text-navy-900 text-sm line-clamp-1">{{ $member->name }}</p>
-                                <p class="text-xs text-slate-400">{{ $member->nim_nidn }}</p>
-                                <span class="badge bg-slate-100 text-slate-600">
-                                    {{ $member->pivot->role ?? ($project->team_lead_id === $member->id ? 'Project Leader' : 'Developer') }}
-                                </span>
+                            <div class="card flex flex-col justify-between p-5 bg-white border border-slate-100 shadow-sm rounded-xl">
+                                <div class="flex items-center gap-3">
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($member->name) }}&background=F1F5F9&color=1E293B"
+                                         class="h-12 w-12 rounded-full ring-2 ring-slate-100 object-cover shrink-0"
+                                         alt="{{ $member->name }}">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-bold text-slate-900 text-sm truncate leading-tight">{{ $member->name }}</p>
+                                        <p class="text-[11px] text-slate-400 font-mono mt-0.5">{{ $member->nim_nidn }}</p>
+
+                                        <div class="mt-1.5">
+                                            <span @class([
+                                                'inline-block text-[9px] font-bold px-2 py-0.5 rounded uppercase border tracking-wider',
+                                                'bg-indigo-50 border-indigo-200 text-indigo-700' => (($member->pivot->role ?? '') === 'ketua' || $project->team_lead_id === $member->id),
+                                                'bg-slate-50 border-slate-200 text-slate-500' => (($member->pivot->role ?? '') !== 'ketua' && $project->team_lead_id !== $member->id)
+                                            ])>
+                                                {{ ($member->pivot->role ?? '') === 'ketua' || $project->team_lead_id === $member->id ? 'Ketua Tim' : 'Developer' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Kotak Deskripsi Tugas Kerja Mandiri --}}
+                                <div class="mt-4 pt-3.5 border-t border-slate-100">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Peran / Kontribusi Pekerjaan:</span>
+                                    <p class="text-xs text-slate-600 font-medium leading-relaxed bg-slate-50/70 p-2.5 rounded-lg border border-slate-100/70 min-h-[44px]">
+                                        {{ $member->pivot->contribution ?? 'Berkontribusi dalam pengembangan arsitektur modul sistem.' }}
+                                    </p>
+                                </div>
                             </div>
                         @empty
-                            <p class="text-sm text-slate-400 italic">Data anggota tidak terdaftar.</p>
+                            <p class="text-sm text-slate-400 italic col-span-full py-4 text-center bg-slate-50 rounded-xl border border-dashed">Data anggota tidak terdaftar.</p>
                         @endforelse
                     </div>
                 </div>
@@ -175,48 +199,49 @@
                 @endif
             </div>
 
-            <aside class="card h-fit p-6 sticky top-24">
+            {{-- RIGHT COLUMN: SIDEBAR METADATA & STATUS --}}
+            <aside class="card h-fit p-6 sticky top-24 bg-white border border-slate-100 shadow-sm rounded-xl">
                 <h3 class="border-b border-slate-100 pb-4 font-bold text-navy-900 text-sm">Metadata Project</h3>
                 <dl class="space-y-4 pt-4 text-xs">
                     <div>
-                        <dt class="text-slate-500">Dosen Pembimbing / Pengampu</dt>
-                        <dd class="mt-0.5 font-semibold text-navy-900 flex flex-wrap gap-1.5">
+                        <dt class="text-slate-500 font-medium">Dosen Pembimbing / Pengampu</dt>
+                        <dd class="mt-1.5 flex flex-wrap gap-1.5">
                             @if($project->courseClass && $project->courseClass->lecturers->isNotEmpty())
                                 @foreach($project->courseClass->lecturers as $lecturer)
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs font-bold text-textCustom-900">
-                                        <i class="fa-solid fa-user-tie text-[11px] text-textCustom-400"></i>
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800">
+                                        <i class="fa-solid fa-user-tie text-[11px] text-slate-400"></i>
                                         {{ $lecturer->name }}
                                     </span>
                                 @endforeach
                             @else
-                                <span class="text-xs text-textCustom-400 italic font-medium">N/A</span>
+                                <span class="text-xs text-slate-400 italic font-medium">N/A</span>
                             @endif
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-slate-500">Semester</dt>
+                        <dt class="text-slate-500 font-medium">Semester</dt>
                         <dd class="mt-0.5 font-semibold text-navy-900">
                             {{ $project->courseClass?->semester?->name ?? 'Genap 2025/2026' }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-slate-500">Mata Kuliah</dt>
+                        <dt class="text-slate-500 font-medium">Mata Kuliah</dt>
                         <dd class="mt-0.5 font-semibold text-navy-900">
                             {{ $project->courseClass?->course?->name ?? 'Project Based Learning' }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-slate-500">Prodi</dt>
+                        <dt class="text-slate-500 font-medium">Prodi</dt>
                         <dd class="mt-0.5 font-semibold text-navy-900">
                             {{ $project->program?->name ?? 'Teknologi Rekayasa Perangkat Lunak' }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-slate-500">Kategori</dt>
+                        <dt class="text-slate-500 font-medium">Kategori</dt>
                         <dd class="mt-0.5 font-semibold text-navy-900">{{ $project->category?->name ?? 'IoT System' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-slate-500">Tanggal Publish</dt>
+                        <dt class="text-slate-500 font-medium">Tanggal Publish</dt>
                         <dd class="mt-0.5 font-semibold text-navy-900">
                             {{ $project->published_at ? $project->published_at->translatedFormat('d F Y') : '1 Januari 2026' }}
                         </dd>
@@ -225,7 +250,7 @@
 
                 <div class="my-5 border-t border-slate-100"></div>
 
-                <div class="bg-slate-50 rounded-xl p-3.5 flex items-center justify-between">
+                <div class="bg-slate-50 rounded-xl p-3.5 flex items-center justify-between border border-slate-100">
                     <div class="flex items-center gap-3">
                         <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shadow-sm">
                             <i class="fa-regular fa-eye text-sm"></i>
@@ -239,14 +264,14 @@
 
                 <div class="mt-6 space-y-3">
                     @if($project->repository_url)
-                        <a href="{{ $project->repository_url }}" target="_blank" class="btn-primary w-full text-center py-2.5 text-xs">
+                        <a href="{{ $project->repository_url }}" target="_blank" class="btn-primary w-full text-center py-2.5 text-xs block">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5L21 3m0 0h-5.5M21 3v5.5M10 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-4"/></svg>
                             GitHub Repository
                         </a>
                     @endif
 
                     @if($project->documentation_url)
-                        <a href="{{ asset($project->documentation_url) }}" download class="btn-outline w-full text-center py-2.5 text-xs">
+                        <a href="{{ asset($project->documentation_url) }}" download class="btn-outline w-full text-center py-2.5 text-xs block">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
                             Download Laporan
                         </a>

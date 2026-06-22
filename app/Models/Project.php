@@ -22,7 +22,7 @@ class Project extends Model implements HasMedia
     use HasUuids, SoftDeletes, InteractsWithMedia;
 
     protected $fillable = [
-        'title', 'slug', 'description', 'short_description',
+        'title', 'slug', 'team_name', 'description', 'short_description',
         'program_id', 'category_id', 'course_class_id', 'cohort',
         'demo_url', 'repository_url', 'documentation_url',
         'status', 'demo_status', 'last_demo_check_at', 'last_demo_status_code',
@@ -67,6 +67,11 @@ class Project extends Model implements HasMedia
         return $this->belongsToMany(User::class, 'project_team')
                     ->using(ProjectTeam::class)
                     ->withPivot('role', 'contribution', 'joined_at');
+    }
+
+    public function features(): HasMany
+    {
+        return $this->hasMany(ProjectFeature::class)->orderBy('order');
     }
 
     public function tags(): BelongsToMany { return $this->belongsToMany(Tag::class, 'project_tags'); }

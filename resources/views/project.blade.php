@@ -93,7 +93,7 @@
                                     @endif
                                 </div>
 
-                                <div class="p-6 flex flex-col flex-1 justify-between">
+                                <div class="p-6 flex flex-col flex-1 justify-between space-y-4">
                                     <div>
                                         <div class="flex items-center gap-2 mb-3">
                                             @php
@@ -101,7 +101,7 @@
                                             @endphp
                                             <span class="inline-block rounded px-2 py-0.5 text-xs font-bold uppercase tracking-wide pointer-events-none"
                                                 style="--badge-color: {{ $colorCode }}; color: var(--badge-color); background-color: rgb(from var(--badge-color) r g b / 0.15);">
-                                                {{ $project->program?->short_name ?? ($project->program?->slug ?? 'SI') }}
+                                                {{ $project->program?->short_name ?? ($project->program?->slug ?? 'TRPL') }}
                                             </span>
                                             <span class="text-sm font-medium text-slate-400">&bull;</span>
                                             <span class="text-sm font-medium text-slate-500">
@@ -118,6 +118,24 @@
                                         <p class="mt-2 text-sm leading-relaxed text-slate-500 line-clamp-2">
                                             {{ $project->short_description ?? ($project->description ?? 'Sistem monitoring dengan dashboard analitik.') }}
                                         </p>
+
+                                        {{-- REVISI KUSTOM 1: PRATINJAU INDIKATOR FITUR UTAMA --}}
+                                        @if($project->features->isNotEmpty())
+                                            <div class="mt-4 space-y-1.5">
+                                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Fitur Utama:</span>
+                                                <div class="flex flex-wrap gap-1">
+                                                    @foreach($project->features->take(3) as $feature)
+                                                        <span class="inline-flex items-center gap-1 text-[11px] font-medium text-navy-700 border border-slate-100 rounded-md px-2 py-0.5 max-w-full truncate" title="{{ $feature->name }}">
+                                                            <i class="{{ $feature->icon ?? 'fa-solid fa-cube' }} text-navy-700 text-[10px]"></i>
+                                                            <span class="truncate">{{ $feature->name }}</span>
+                                                        </span>
+                                                    @endforeach
+                                                    @if($project->features->count() > 3)
+                                                        <span class="text-[10px] font-bold text-indigo-600 self-center pl-1">+{{ $project->features->count() - 3 }} Lainnya</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
 
                                     <div>

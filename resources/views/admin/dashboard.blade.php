@@ -74,28 +74,34 @@
         <div class="space-y-[18px]">
             {{-- Statistik Batang Terbuka (Statis/Semi-Dinamis dari Mockup) --}}
             <div class="bg-panel border border-slate-200 rounded-admin-md shadow-admin-sm">
-                <div class="flex items-center justify-between p-[18px_20px] border-b border-slate-100">
+                <div class="flex items-center justify-between border-b border-slate-100" style="padding: 18px 20px;">
                     <div>
                         <h2 class="text-[14.5px] font-bold text-textCustom-900">Submission Project</h2>
                         <div class="text-[12px] text-textCustom-400 font-medium mt-0.5">Tren aktivitas submission tahun {{ date('Y') }}</div>
                     </div>
                 </div>
                 <div class="p-5">
-                    <div class="p-[6px_4px_0_4px]">
+                    <div style="padding: 6px 4px 0 4px;">
                         <div class="flex items-end gap-3.5 h-[190px] px-1">
-                            @foreach(['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'] as $idx => $month)
-                                <div class="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+                            @foreach($stats['chart_data'] as $data)
+                                <div class="flex-1 flex flex-col items-center gap-2 h-full justify-end" title="Disetujui: {{ $data['approved'] }}, Pending: {{ $data['pending'] }}">
                                     <div class="w-full max-w-[34px] flex flex-col justify-end h-full rounded-md overflow-hidden bg-borderSoft">
-                                        {{-- Visualisasi bar berdasarkan proporsi data riil/mockup --}}
-                                        <div class="bg-navy-700" style="height: {{ 15 + ($idx * 5) }}%;"></div>
-                                        <div class="bg-teal-500" style="height: {{ 50 + ($idx * 4) }}%;"></div>
+                                        {{-- Bar Atas: Menunggu Review (Navy) --}}
+                                        @if($data['pending_height'] > 0)
+                                            <div class="bg-navy-700 transition-all duration-500" style="height: {{ $data['pending_height'] }}%;"></div>
+                                        @endif
+
+                                        {{-- Bar Bawah: Disetujui / Live (Teal) --}}
+                                        @if($data['approved_height'] > 0)
+                                            <div class="bg-teal-500 transition-all duration-500" style="height: {{ $data['approved_height'] }}%;"></div>
+                                        @endif
                                     </div>
-                                    <span class="text-[11px] text-textCustom-400 font-600">{{ $month }}</span>
+                                    <span class="text-[11px] text-textCustom-400 font-semibold">{{ $data['label'] }}</span>
                                 </div>
                             @endforeach
                         </div>
                     </div>
-                    <div class="flex gap-[18px] mt-4 pt-3.5 border-t border-slate-100 text-xs font-medium text-textCustom-600">
+                    <div class="flex gap-[18px] border-t border-slate-100 text-xs font-medium text-textCustom-600" style="margin-top: 1rem; padding-top: 3.5px;">
                         <div class="flex items-center gap-[7px]"><span class="w-2 h-2 rounded-[2px] bg-teal-500"></span>Disetujui (Live)</div>
                         <div class="flex items-center gap-[7px]"><span class="w-2 h-2 rounded-[2px] bg-navy-700"></span>Menunggu Review</div>
                     </div>

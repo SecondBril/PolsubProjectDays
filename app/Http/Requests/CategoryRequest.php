@@ -17,7 +17,6 @@ class CategoryRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('categories')->ignore($this->category)],
             'description' => ['nullable', 'string'],
-            'icon' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],
         ];

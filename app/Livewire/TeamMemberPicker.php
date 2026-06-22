@@ -14,8 +14,12 @@ class TeamMemberPicker extends Component
     {
         $searchResults = [];
         if (strlen($this->search) >= 2) {
-            $searchResults = User::where('nim_nidn', 'like', '%' . $this->search . '%')
-                ->orWhere('name', 'like', '%' . $this->search . '%')
+            // KUNCI UTAMA: Filter role mahasiswa, lalu kelompokkan OR pencariannya
+            $searchResults = User::where('role', 'mahasiswa')
+                ->where(function ($query) {
+                    $query->where('nim_nidn', 'like', '%' . $this->search . '%')
+                          ->orWhere('name', 'like', '%' . $this->search . '%');
+                })
                 ->take(5)
                 ->get();
         }
@@ -33,7 +37,8 @@ class TeamMemberPicker extends Component
             $this->selectedMembers[] = [
                 'id' => $user->id,
                 'name' => $user->name,
-                'nim_nidn' => $user->nim_nidn
+                'nim_nidn' => $user->nim_nidn,
+                'contribution' => '' // Sediakan key kontribusi kosong untuk diisi di form
             ];
         }
         $this->search = '';

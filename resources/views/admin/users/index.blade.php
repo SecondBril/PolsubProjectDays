@@ -1,11 +1,26 @@
 <x-admin-layout title="Manajemen Pengguna">
-    <div class="space-y-6" x-data="{ openCreateModal: false, openEditModal: false, openRejectModal: false, currentUser: {} }">
+    <div class="space-y-6" x-data="{ openCreateModal: false, openEditModal: false, openRejectModal: false, openImportModal: false, currentUser: {} }">
 
         {{-- Flash Message Success --}}
         @if(session('success'))
             <div class="p-4 bg-teal-500/10 border border-teal-500/30 text-teal-600 rounded-xl text-sm font-medium flex items-center gap-3">
                 <i class="fa-solid fa-circle-check text-base"></i>
                 <div>{{ session('success') }}</div>
+            </div>
+        @endif
+
+        {{-- PERBAIKAN 2: Flash Message Khusus Error Validasi Baris Excel --}}
+        @if(session('import_errors'))
+            <div class="p-4 bg-rose-500/10 border border-rose-500/30 text-rose-600 rounded-xl text-sm font-medium">
+                <div class="flex items-center gap-3 mb-2 font-bold">
+                    <i class="fa-solid fa-circle-xmark text-base"></i>
+                    <span>Impor Gagal! Beberapa baris data tidak valid:</span>
+                </div>
+                <ul class="list-disc list-inside space-y-1 text-xs pl-2 text-rose-500/90 font-mono">
+                    @foreach(session('import_errors') as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
@@ -25,9 +40,15 @@
                 @endif
             </form>
 
-            <button type="button" @click="openCreateModal = true" class="w-fit flex items-center justify-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors shrink-0">
-                <i class="fa-solid fa-user-plus text-[13px]"></i> Tambah Akun Baru
-            </button>
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <button type="button" @click="openImportModal = true" class="w-fit flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold shadow-sm border border-slate-200 transition-colors shrink-0">
+                    <i class="fa-solid fa-file-excel text-[13px] text-emerald-600"></i> Import Excel
+                </button>
+
+                <button type="button" @click="openCreateModal = true" class="w-fit flex items-center justify-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors shrink-0">
+                    <i class="fa-solid fa-user-plus text-[13px]"></i> Tambah Akun Baru
+                </button>
+            </div>
         </div>
 
         {{-- TABEL DATA PENGGUNA --}}
@@ -79,7 +100,6 @@
                                 <td class="py-4 px-5 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         @if(!$user->is_active)
-                                            {{-- Tombol Approve (Tetap Menggunakan Form POST Langsung) --}}
                                             <form method="POST" action="{{ route('admin.users.approve', $user->id) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
@@ -88,7 +108,6 @@
                                                 </button>
                                             </form>
 
-                                            {{-- TOMBOL REJECT KUSTOM (Memicu Pop-up Modal) --}}
                                             <button type="button"
                                                     @click="currentUser = {{ json_encode($user) }}; openRejectModal = true"
                                                     class="p-1.5 bg-rose-500/10 text-rose-600 border border-rose-500/20 rounded-md hover:bg-rose-500 hover:text-white transition-all"
@@ -97,7 +116,6 @@
                                             </button>
                                         @endif
 
-                                        {{-- Tombol Edit Trigger --}}
                                         <button type="button" @click="currentUser = {{ json_encode($user) }}; openEditModal = true" class="p-1.5 bg-slate-100 text-slate-600 border border-slate-200 rounded-md hover:bg-navy-900 hover:text-white transition-all" title="Edit Data">
                                             <i class="fa-solid fa-pen-to-square text-[13px]"></i>
                                         </button>
@@ -124,8 +142,75 @@
         </div>
 
         {{-- ========================================== --}}
-        {{-- MODAL MODUL 1: TAMBAH USER BARU            --}}
+        {{-- PERBAIKAN 4: MODAL POP-UP UPLOAD EXCEL     --}}
         {{-- ========================================== --}}
+        <div class="fixed inset-0 bg-navy-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" x-show="openImportModal" x-transition style="display: none;">
+            <div class="bg-white rounded-2xl border border-slate-200 max-w-lg w-full overflow-hidden shadow-2xl" @click.away="openImportModal = false">
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                    <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-file-excel text-emerald-600"></i> Mass Import via Excel
+                    </h3>
+                    <button type="button" @click="openImportModal = false" class="text-slate-400 hover:text-slate-600 text-sm">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+
+                <form method="POST" action="{{ route('admin.users.import') }}" enctype="multipart/form-data" class="p-5 space-y-4">
+                    @csrf
+
+                    {{-- Petunjuk Aturan Format --}}
+                    <div class="p-3.5 bg-slate-50 border border-slate-200/60 rounded-xl space-y-2">
+                        <span class="text-xs font-bold text-slate-800 uppercase tracking-wide block">Struktur Kolom Excel:</span>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-[10px] font-mono border border-slate-200 text-center bg-white">
+                                <tr class="bg-slate-100 text-slate-700 font-bold">
+                                    <th class="border p-1">name</th>
+                                    <th class="border p-1">email</th>
+                                    <th class="border p-1">nim_nidn</th>
+                                    <th class="border p-1">role</th>
+                                    <th class="border p-1">program</th>
+                                    <th class="border p-1">password</th>
+                                </tr>
+                                <tr class="text-slate-500">
+                                    <td class="border p-1">John Doe</td>
+                                    <td class="border p-1">john@mail.com</td>
+                                    <td class="border p-1">20261021</td>
+                                    <td class="border p-1">mahasiswa</td>
+                                    <td class="border p-1">TRPL</td>
+                                    <td class="border p-1"><em>(opsional)</em></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <ul class="list-disc list-inside text-[11px] text-textCustom-500 space-y-0.5 pt-1 pl-1">
+                            <li>Baris pertama <strong>wajib</strong> diisi nama kolom di atas (huruf kecil).</li>
+                            <li>Kolom <code class="bg-slate-200 px-1 rounded text-red-600">role</code> hanya boleh diisi: <span class="font-semibold text-slate-700">admin, dosen, mahasiswa</span>.</li>
+                            <li>Kolom <code class="bg-slate-200 px-1 rounded text-slate-700">program</code> diisi Nama/Kode Prodi yang terdaftar di sistem.</li>
+                            <li>Jika <code class="bg-slate-200 px-1 rounded text-slate-700">password</code> dikosongkan, defaultnya menggunakan nilai <code class="text-slate-700">nim_nidn</code>.</li>
+                        </ul>
+                    </div>
+
+                    {{-- Input File --}}
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Pilih File Excel / CSV</label>
+                        <div class="border-2 border-dashed border-slate-200 hover:border-teal-500 rounded-xl p-4 transition-colors bg-surface relative flex flex-col items-center justify-center gap-1">
+                            <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400"></i>
+                            <input type="file" name="file" required class="absolute inset-0 opacity-0 cursor-pointer" onchange="this.nextElementSibling.innerText = this.files[0].name">
+                            <span class="text-xs font-semibold text-slate-600 text-center">Klik atau seret file ke sini</span>
+                            <span class="text-[10px] text-textCustom-400">Format: .xlsx, .xls, .csv (Maks. 2MB)</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+                        <button type="button" @click="openImportModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs transition-colors">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs transition-colors shadow-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-upload"></i> Proses Impor
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {{-- MODAL MODUL 1: TAMBAH USER BARU --}}
         <div class="fixed inset-0 bg-navy-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" x-show="openCreateModal" x-transition style="display: none;">
             <div class="bg-white rounded-2xl border border-slate-200 max-w-md w-full overflow-hidden shadow-2xl" @click.away="openCreateModal = false">
                 <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
@@ -177,9 +262,7 @@
             </div>
         </div>
 
-        {{-- ========================================== --}}
-        {{-- MODAL MODUL 2: EDIT USER DATA              --}}
-        {{-- ========================================== --}}
+        {{-- MODAL MODUL 2: EDIT USER DATA --}}
         <div class="fixed inset-0 bg-navy-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" x-show="openEditModal" x-transition style="display: none;">
             <div class="bg-white rounded-2xl border border-slate-200 max-w-md w-full overflow-hidden shadow-2xl" @click.away="openEditModal = false">
                 <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
@@ -233,46 +316,26 @@
             </div>
         </div>
 
-        {{-- ========================================== --}}
-        {{-- MODAL MODUL 3: POP-UP REJECT KUSTOM       --}}
-        {{-- ========================================== --}}
-        <div class="fixed inset-0 bg-navy-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            x-show="openRejectModal"
-            x-transition
-            style="display: none;">
-
-            <div class="bg-white rounded-2xl border border-slate-200 max-w-sm overflow-hidden shadow-2xl"
-                @click.away="openRejectModal = false">
-
+        {{-- MODAL MODUL 3: POP-UP REJECT KUSTOM --}}
+        <div class="fixed inset-0 bg-navy-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" x-show="openRejectModal" x-transition style="display: none;">
+            <div class="bg-white rounded-2xl border border-slate-200 max-w-sm overflow-hidden shadow-2xl" @click.away="openRejectModal = false">
                 <div class="p-6 pb-4">
-                    {{-- Icon Peringatan Bahaya --}}
                     <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg mb-4 shadow-sm border border-rose-100">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>
-
-                    {{-- Konten Informasi Akun Terkait --}}
                     <div class="leading-relaxed">
                         <h3 class="text-base font-bold text-slate-900 mb-1">Tolak Pendaftaran Pengguna?</h3>
                         <p class="text-xs text-textCustom-600">
-                            Akun atas nama <span class="font-semibold text-slate-900" x-text="currentUser.name"></span>
-                            (<span class="font-mono text-[11px]" x-text="currentUser.nim_nidn"></span>) akan ditolak dan dihapus secara permanen dari basis data antrean masuk sistem.
+                            Akun atas nama <span class="font-semibold text-slate-900" x-text="currentUser.name"></span> (<span class="font-mono text-[11px]" x-text="currentUser.nim_nidn"></span>) akan ditolak dan dihapus secara permanen dari basis data antrean masuk sistem.
                         </p>
                     </div>
                 </div>
-
-                {{-- Aksi Submit Form Pembatalan Sesi --}}
                 <div class="flex items-center justify-end gap-2 p-2 border-t border-slate-100 bg-slate-50">
-                    <button type="button"
-                            @click="openRejectModal = false"
-                            class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 font-semibold rounded-lg text-xs transition-colors">
-                        Batal
-                    </button>
-
+                    <button type="button" @click="openRejectModal = false" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 font-semibold rounded-lg text-xs transition-colors">Batal</button>
                     <form method="POST" :action="`{{ url('admin/users') }}/${currentUser.id}/reject`" class="inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit"
-                                class="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
+                        <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
                             <i class="fa-regular fa-trash-can"></i> Ya, Tolak &amp; Hapus
                         </button>
                     </form>

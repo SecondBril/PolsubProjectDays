@@ -31,7 +31,7 @@
                 @csrf
 
                 <div class="card p-6 space-y-4">
-                    <h3 class="text-sm font-bold text-navy-900 border-b border-slate-100 pb-2">1. Informasi Akademik Proyek</h3>
+                    <h3 class="text-sm font-bold text-navy-900 border-b border-slate-100 pb-2">Informasi Akademik Proyek</h3>
 
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
@@ -76,7 +76,7 @@
                 </div>
 
                 <div class="card p-6 space-y-4">
-                    <h3 class="text-sm font-bold text-navy-900 border-b border-slate-100 pb-2">2. Deskripsi & Detail Aplikasi</h3>
+                    <h3 class="text-sm font-bold text-navy-900 border-b border-slate-100 pb-2">Deskripsi & Detail Aplikasi</h3>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Resmi Proyek <span class="text-rose-500">*</span></label>
@@ -108,8 +108,95 @@
 
                 @livewire('team-member-picker')
 
+                {{-- ========================================== --}}
+                {{-- REVISI: INPUT DINAMIS FITUR & ICON PICKER   --}}
+                {{-- ========================================== --}}
+                <div class="card p-6 space-y-4" x-data="{
+                    features: {{ json_encode(old('features', [])) }} || [],
+                    iconSearch: '',
+                    activePickerIndex: null,
+                    // Inject langsung array PHP dari controller menjadi objek array JSON
+                    fontAwesomeIcons: {{ json_encode($fontAwesomeIcons) }},
+
+                    addFeature() {
+                        this.features.push({ name: '', icon: 'fa-solid fa-star' });
+                    },
+                    removeFeature(index) {
+                        this.features.splice(index, 1);
+                    },
+                    get filteredIcons() {
+                        if (!this.iconSearch) return this.fontAwesomeIcons;
+                        return this.fontAwesomeIcons.filter(icon => icon.toLowerCase().includes(this.iconSearch.toLowerCase()));
+                    }
+                }" x-init="if(features.length === 0) addFeature()">
+
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <h3 class="text-sm font-bold text-navy-900">Fitur Utama Sistem</h3>
+                        <button type="button" @click="addFeature()" class="inline-flex items-center gap-1 px-2.5 py-1 bg-teal-500 hover:bg-teal-600 text-white text-[11px] font-bold rounded-md transition shadow-sm">
+                            <i class="fa-solid fa-plus"></i> Tambah Fitur
+                        </button>
+                    </div>
+
+                    <p class="text-[11px] text-slate-500">Daftarkan modul atau fitur keunggulan sistem yang berhasil dikembangkan oleh kelompok Anda beserta representasi ikon visualnya.</p>
+
+                    <div class="space-y-3">
+                        <template x-for="(feature, index) in features" :key="index">
+                            <div class="flex items-start gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200/60 relative">
+
+                                {{-- Nomor Urut & Input Nama Fitur --}}
+                                <div class="flex-1">
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1" x-text="`Nama Fitur #${index + 1}`"></label>
+                                    <input type="text" :name="`features[${index}][name]`" x-model="feature.name" required placeholder="Contoh: Otentikasi Multi-faktor (MFA)" class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-700 focus:outline-none focus:ring-1 focus:ring-navy-500 bg-white">
+                                </div>
+
+                                {{-- Pilihan Ikon Font Awesome --}}
+                                <div class="w-40 relative">
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Ikon Tampilan</label>
+
+                                    {{-- Trigger Tombol Buka Popover Icon Picker --}}
+                                    <button type="button" @click="activePickerIndex = (activePickerIndex === index ? null : index); iconSearch = ''" class="w-full flex items-center justify-between gap-2 text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-700 bg-white hover:bg-slate-50 text-left outline-none">
+                                        <span class="flex items-center gap-2 truncate">
+                                            <i :class="feature.icon || 'fa-solid fa-star'" class="text-teal-600 text-sm"></i>
+                                            <span x-text="feature.icon ? feature.icon.replace('fa-solid ', '') : 'Pilih Ikon'"></span>
+                                        </span>
+                                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                                    </button>
+
+                                    {{-- Input Hidden untuk Payload Pengiriman Form --}}
+                                    <input type="hidden" :name="`features[${index}][icon]`" x-model="feature.icon">
+
+                                    {{-- Dropdown Container Panel Pencarian Ikon --}}
+                                    <div class="absolute right-0 mt-1 w-64 bg-white border border-slate-200 rounded-xl shadow-xl z-30 p-3 space-y-2" x-show="activePickerIndex === index" @click.away="activePickerIndex = null" x-transition style="display: none;">
+                                        <input type="text" x-model="iconSearch" placeholder="Cari ikon... (cth: server)" class="w-full text-[11px] rounded-md border border-slate-200 px-2.5 py-1.5 text-slate-700 outline-none focus:border-teal-500">
+
+                                        {{-- Grid List Ikon --}}
+                                        <div class="grid grid-cols-5 gap-1.5 max-h-36 overflow-y-auto p-0.5 custom-scrollbar">
+                                            <template x-for="icon in filteredIcons" :key="icon">
+                                                <button type="button" @click="feature.icon = icon; activePickerIndex = null" :class="feature.icon === icon ? 'bg-teal-500 text-white border-teal-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'" class="p-2 text-center rounded-md border transition-all flex items-center justify-center text-sm" :title="icon">
+                                                    <i :class="icon"></i>
+                                                </button>
+                                            </template>
+                                            <template x-if="filteredIcons.length === 0">
+                                                <div class="col-span-5 text-center py-4 text-[11px] text-slate-400">Ikon tidak ditemukan</div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Tombol Hapus Baris Fitur --}}
+                                <div class="pt-5">
+                                    <button type="button" @click="removeFeature(index)" class="p-2 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg transition-all" title="Hapus Fitur">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
+                                </div>
+
+							</div>
+                        </template>
+                    </div>
+                </div>
+
                 <div class="card p-6 space-y-4">
-                    <h3 class="text-sm font-bold text-navy-900 border-b border-slate-100 pb-2">4. Tautan Deploy Aplikasi (URLs)</h3>
+                    <h3 class="text-sm font-bold text-navy-900 border-b border-slate-100 pb-2">Tautan Deploy Aplikasi (URLs)</h3>
 
                     <div class="space-y-3">
                         <div>
@@ -128,7 +215,7 @@
                 </div>
 
                 <div class="card p-6 space-y-4">
-                    <h3 class="text-sm font-bold text-navy-900 border-b border-slate-100 pb-2">5. Berkas Gambar Aplikasi</h3>
+                    <h3 class="text-sm font-bold text-navy-900 border-b border-slate-100 pb-2">Berkas Gambar Aplikasi</h3>
 
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
@@ -155,4 +242,5 @@
         </div>
     </div>
 </x-app-layout>
+
 

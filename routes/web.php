@@ -28,6 +28,11 @@ Route::prefix('project')->name('project.')->group(function () {
     Route::get('/{slug}', [ProjectControllerr::class, 'show'])->name('show');
 });
 
+Route::get('/about', function () {
+    return view('about');
+})->name('about');
+
+
 /*
 |--------------------------------------------------------------------------
 | PROFILE ROUTES (Breeze Standard - Accessible by Admin, Dosen, Mahasiswa)
@@ -121,6 +126,7 @@ Route::middleware(['auth', 'role:admin|dosen'])
 
 
         // User Management, Approval & CRUD
+        Route::post('/users/import', [UserController::class, 'import'])->name('users.import');
         Route::patch('/users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
         Route::delete('/users/{user}/reject', [UserController::class, 'reject'])->name('users.reject');
         Route::resource('users', UserController::class)->except(['show']);

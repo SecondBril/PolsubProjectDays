@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Preview — JTIK POLSUB Showcase</title>
+<title>Preview — POLS-HUB JTIK Showcase</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -45,7 +45,7 @@
 <!-- ============================================================ -->
 <header x-data="{ mobileOpen: false }" class="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
   <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-    <a href="#home" class="text-lg font-extrabold tracking-tight text-navy-900">JTIK POLSUB</a>
+    <a href="#home" class="text-lg font-extrabold tracking-tight text-navy-900">POLS-HUB JTIK</a>
     <nav class="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
       <a href="#home" class="relative pb-1 font-semibold text-navy-800">Home<span class="absolute -bottom-[1px] left-0 h-0.5 w-full rounded-full bg-navy-800"></span></a>
       <a href="#" class="hover:text-navy-800">Projects</a>
@@ -77,7 +77,7 @@
   <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-20">
     <div>
       <span class="badge bg-blue-50 text-blue-700">SHOWCASE PLATFORM</span>
-      <h1 class="mt-5 text-4xl font-extrabold leading-tight text-navy-900 sm:text-5xl">Karya Terbaik Mahasiswa JTIK POLSUB</h1>
+      <h1 class="mt-5 text-4xl font-extrabold leading-tight text-navy-900 sm:text-5xl">Karya Terbaik Mahasiswa POLS-HUB JTIK</h1>
       <p class="mt-5 max-w-md text-base leading-relaxed text-slate-500">Platform apresiasi dan showcase hasil Project Based Learning (PBL) mahasiswa Jurusan Teknik Informatika dan Komputer Politeknik Negeri Subang.</p>
       <div class="mt-8 flex flex-wrap gap-3">
         <button class="btn-primary">Jelajahi Project
@@ -263,7 +263,7 @@
 <!-- ============================================================ -->
 <footer class="bg-navy-900">
   <div class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10 md:flex-row md:items-center md:justify-between">
-    <div><p class="text-lg font-extrabold text-white">JTIK POLSUB</p><p class="mt-1 text-sm text-slate-400">&copy; 2026 JTIK POLSUB Showcase. All rights reserved.</p></div>
+    <div><p class="text-lg font-extrabold text-white">POLS-HUB JTIK</p><p class="mt-1 text-sm text-slate-400">&copy; 2026 POLS-HUB JTIK Showcase. All rights reserved.</p></div>
     <nav class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-300">
       <a href="#" class="hover:text-white">Privacy Policy</a><a href="#" class="hover:text-white">Terms of Service</a><a href="#" class="hover:text-white">Contact Faculty</a><a href="#" class="hover:text-white">Technical Support</a>
     </nav>
@@ -278,7 +278,7 @@
 
 <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
   <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-    <a href="#home" class="text-lg font-extrabold tracking-tight text-navy-900">JTIK POLSUB</a>
+    <a href="#home" class="text-lg font-extrabold tracking-tight text-navy-900">POLS-HUB JTIK</a>
     <nav class="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
       <a href="#home" class="hover:text-navy-800">Home</a><a href="#" class="hover:text-navy-800">Projects</a><a href="#" class="hover:text-navy-800">Leaderboard</a><a href="#" class="hover:text-navy-800">About</a>
     </nav>
@@ -387,7 +387,7 @@
 
 <footer class="bg-navy-900">
   <div class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10 md:flex-row md:items-center md:justify-between">
-    <div><p class="text-lg font-extrabold text-white">JTIK POLSUB</p><p class="mt-1 text-sm text-slate-400">&copy; 2026 JTIK POLSUB Showcase. All rights reserved.</p></div>
+    <div><p class="text-lg font-extrabold text-white">POLS-HUB JTIK</p><p class="mt-1 text-sm text-slate-400">&copy; 2026 POLS-HUB JTIK Showcase. All rights reserved.</p></div>
     <nav class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-300">
       <a href="#" class="hover:text-white">Privacy Policy</a><a href="#" class="hover:text-white">Terms of Service</a><a href="#" class="hover:text-white">Contact Faculty</a><a href="#" class="hover:text-white">Technical Support</a>
     </nav>

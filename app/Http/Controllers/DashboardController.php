@@ -93,17 +93,22 @@ class DashboardController extends Controller
         });
 
         // 2. CACHE 3 PROYEK TERBARU YANG SUDAH LIVE
-        $latestProjects = Cache::remember(CacheKeys::DASHBOARD_LATEST, CacheKeys::TTL_SHORT, function () {
-            return Project::published()
-                ->with(['program'])
-                ->withCount(['teamMembers'])
-                ->latest('published_at')
-                ->limit(3)
-                ->get()
-                ->each(function ($project) {
-                    $project->thumbnail_url = $project->getFirstMediaUrl('thumbnail', 'card-thumbnail');
-                });
-        });
+        // $latestProjects = Cache::remember(CacheKeys::DASHBOARD_LATEST, CacheKeys::TTL_SHORT, function () {
+        //     return Project::published()
+        //         ->with(['program'])
+        //         ->withCount(['teamMembers'])
+        //         ->latest('published_at')
+        //         ->limit(3)
+        //         ->get();
+        // });
+
+        // 2. AMBIL LANGSUNG TANPA CACHE UNTUK DEBUG
+        $latestProjects = Project::published()
+            ->with(['program'])
+            ->withCount(['teamMembers'])
+            ->latest('published_at')
+            ->limit(3)
+            ->get();
 
         // 3. DATA REALTIME UNTUK ACTIONABLE INSIGHTS (Tidak Di-cache)
         $pendingProjectList = Project::pending()->with(['program'])->latest()->limit(5)->get();

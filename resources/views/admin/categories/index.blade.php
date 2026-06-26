@@ -12,7 +12,7 @@
         {{-- TOP PANEL: INFO & BUTTON ACTION --}}
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
             <div>
-                <p class="text-textCustom-600 text-xs">Kelola rumpun kategori aplikasi luaran proyek mahasiswa JTIK POLSUB.</p>
+                <p class="text-textCustom-600 text-xs">Kelola rumpun kategori aplikasi luaran proyek mahasiswa POLS-HUB JTIK.</p>
             </div>
             <button type="button" @click="openCreateModal = true" class="w-fit flex items-center justify-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors shrink-0">
                 <i class="fa-solid fa-plus text-[12px]"></i> Tambah Kategori

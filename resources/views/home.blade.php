@@ -1,11 +1,11 @@
 <x-app-layout>
-    <x-slot:title>Home — JTIK POLSUB Showcase</x-slot:title>
+    <x-slot:title>Home — POLS-HUB JTIK Showcase</x-slot:title>
 
     <section id="home" class="overflow-hidden">
         <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-20">
             <div>
                 <span class="badge bg-blue-50 text-blue-700">SHOWCASE PLATFORM</span>
-                <h1 class="mt-5 text-4xl font-extrabold leading-tight text-navy-900 sm:text-5xl">Karya Terbaik Mahasiswa JTIK POLSUB</h1>
+                <h1 class="mt-5 text-4xl font-extrabold leading-tight text-navy-900 sm:text-5xl">Karya Terbaik Mahasiswa POLS-HUB JTIK</h1>
                 <p class="mt-5 max-w-md text-base leading-relaxed text-slate-500">Platform apresiasi dan showcase hasil Project Based Learning (PBL) mahasiswa Jurusan Teknik Informatika dan Komputer Politeknik Negeri Subang.</p>
                 <div class="mt-8 flex flex-wrap gap-3">
                     <a href="{{ route('project.index') }}" class="btn-primary">

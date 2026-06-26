@@ -10,7 +10,11 @@ class CourseRequest extends FormRequest
 
     public function rules(): array
     {
-        $id = $this->route('course')?->id;
+        // Mengambil parameter route 'course'. Jika berupa objek model, ambil id-nya.
+        // Jika berupa string/int, gunakan langsung.
+        $courseParameter = $this->route('course');
+        $id = is_object($courseParameter) ? $courseParameter->id : $courseParameter;
+
         return [
             'program_id' => ['required', 'exists:programs,id'],
             'code' => ['required', 'string', 'max:20', Rule::unique('courses', 'code')->ignore($id)],

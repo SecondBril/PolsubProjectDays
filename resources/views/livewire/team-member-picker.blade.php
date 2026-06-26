@@ -1,3 +1,5 @@
+
+
 <div class="card bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-5">
     <div class="relative">
         <label class="flex items-center gap-2 text-sm font-semibold text-slate-800 tracking-tight">
@@ -32,11 +34,11 @@
                     <div class="mt-2 pt-3 border-t border-blue-200/50">
                         <label class="block text-[10px] font-bold text-blue-900 uppercase mb-1.5 tracking-wider">Kontribusi Anda Sebagai Ketua Tim <span class="text-rose-500">*</span></label>
                         <input type="text"
-                               name="leader_contribution"
-                               value="{{ old('leader_contribution') }}"
-                               required
-                               placeholder="Contoh: Project Manager, Merancang Arsitektur Database, dan Integrasi API..."
-                               class="w-full text-xs rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 outline-none shadow-sm transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            name="leader_contribution"
+                            wire:model="leaderContribution"
+                            required
+                            placeholder="Contoh: Project Manager, Merancang Arsitektur Database, dan Integrasi API..."
+                            class="w-full text-xs rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 outline-none shadow-sm transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                     </div>
                 </div>
             @endif

@@ -50,7 +50,6 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:mahasiswa', 'verified'])->group(function () {
-    // Menggunakan resource yang sama, biarkan controller mengisolasi data via Auth::id()
     Route::resource('submit-project', ProjectController::class)->names([
         'index'   => 'projects.index',
         'create'  => 'projects.create',
@@ -58,7 +57,8 @@ Route::middleware(['auth', 'role:mahasiswa', 'verified'])->group(function () {
         'show'    => 'projects.show',
         'edit'    => 'projects.edit',
         'update'  => 'projects.update',
-        'destroy' => 'projects.destroy',
+    ])->parameters([
+        'submit-project' => 'project'
     ]);
 });
 

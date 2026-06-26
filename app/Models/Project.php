@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\MediaLibrary\HasMedia;
@@ -19,7 +21,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class Project extends Model implements HasMedia
 {
     // <--- 3. TAMBAHKAN InteractsWithMedia
-    use HasUuids, SoftDeletes, InteractsWithMedia;
+    use HasUuids, SoftDeletes, InteractsWithMedia, HasFactory;
 
     protected $fillable = [
         'title', 'slug', 'team_name', 'description', 'short_description',
@@ -130,5 +132,13 @@ class Project extends Model implements HasMedia
             ->height(450)
             ->optimize()
             ->nonQueued();
+    }
+
+    protected function thumbnailUrl(): Attribute
+    {
+        return Attribute::get(function () {
+            // Asumsi menggunakan Spatie Media Library
+            return $this->getFirstMediaUrl('thumbnail', 'card-thumbnail') ?: asset('images/default-thumbnail.png');
+        });
     }
 }

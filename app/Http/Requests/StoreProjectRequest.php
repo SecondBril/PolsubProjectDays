@@ -1,74 +1,68 @@
 <?php
 
-namespace App\Http\Requests;
+namespace Database\Seeders;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
+use App\Models\Project;
+use App\Models\User;
+use App\Models\Tag;
+use Illuminate\Database\Seeder;
 
-class StoreProjectRequest extends FormRequest
+class ProjectSeeder extends Seeder
 {
-    public function authorize(): bool
+    public function run(): void
     {
-        return Auth::check();
-    }
+        // 1. Ubah count factory menjadi 50 data project
+        $projects = Project::factory()->count(50)->create();
 
-    public function rules(): array
-    {
-        $isAdminOrDosen = $this->user()?->hasAnyRole(['admin', 'dosen']);
+        // Ambil data mahasiswa untuk anggota tim
+        $students = User::role('mahasiswa')->get();
+        $tags = Tag::all();
 
-        return [
-            'title' => ['required', 'string', 'max:200'],
-            'short_description' => ['nullable', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'program_id' => ['required', Rule::exists('programs', 'id')],
-            'category_id' => ['required', Rule::exists('categories', 'id')],
-            'course_class_id' => ['required', Rule::exists('course_classes', 'id')],
-            'cohort' => ['required', 'integer', 'min:2000', 'max:' . (date('Y') + 1)],
-            'demo_url' => ['nullable', 'url', 'max:500'],
-            'repository_url' => ['nullable', 'url', 'max:500'],
+        if ($students->isEmpty()) {
+            $this->command->warn('Seeder Warning: Tidak ada user dengan role "mahasiswa". Isi tabel users terlebih dahulu!');
+            return;
+        }
 
-            // Anggota tambahan bersifat opsional (karena minimal kelompok bisa saja 1 orang yaitu ketua sendiri)
-            'team_members' => ['nullable', 'array', 'max:4'],
+        foreach ($projects as $project) {
+            // Pastikan project memiliki team_lead_id yang valid dari database mahasiswa jika factory tidak mengisinya
+            $leaderId = $project->team_lead_id ?: $students->random()->id;
 
-            // PERBAIKAN: Gunakan 'distinct' agar ID anggota tidak boleh kembar di form,
-            // dan pastikan ID anggota tidak sama dengan ID ketua yang sedang dipilih/dikunci.
-            'team_members.*.user_id' => [
-                'required',
-                'distinct',
-                Rule::exists('users', 'id'),
-                function ($attribute, $value, $fail) use ($isAdminOrDosen) {
-                    $targetLeadId = $isAdminOrDosen ? $this->input('team_lead_id') : Auth::id();
-                    if ($value == $targetLeadId) {
-                        $fail('Mahasiswa yang dipilih sebagai ketua tidak boleh dimasukkan kembali sebagai anggota tambahan.');
-                    }
-                }
-            ],
-            'team_members.*.contribution' => ['required_with:team_members.*.user_id', 'string', 'max:1000'],
+            if (!$project->team_lead_id) {
+                $project->update(['team_lead_id' => $leaderId]);
+            }
 
-            // PERBAIKAN: Aturan kondisional dibersihkan dari string 'nullable' yang kontradiktif
-            'leader_contribution' => [
-                $isAdminOrDosen ? 'nullable' : 'required',
-                'string',
-                'max:1000'
-            ],
+            // 2. Ambil 1-3 mahasiswa acak di luar ketua kelompok untuk menjadi anggota tambahan
+            $potentialMembers = $students->where('id', '!=', $leaderId);
 
-            'tags' => ['nullable', 'array'],
-            'tags.*' => [Rule::exists('tags', 'id')],
-            'thumbnail' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
-            'screenshots' => ['nullable', 'array', 'max:5'],
-            'screenshots.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            // Antisipasi jika jumlah mahasiswa di DB terbatas
+            $takeCount = min(rand(1, 3), $potentialMembers->count());
+            $teamMembers = $takeCount > 0 ? $potentialMembers->random($takeCount) : collect();
 
-            // PERBAIKAN: Jika yang input Admin/Dosen, team_lead_id WAJIB ditentukan
-            'team_lead_id' => [
-                $isAdminOrDosen ? 'required' : 'nullable',
-                Rule::exists('users', 'id')
-            ],
+            $pivotData = [];
 
-            'team_name' => 'nullable|string|max:255',
-            'features' => ['nullable', 'array'],
-            'features.*.name' => ['required_with:features.*.icon', 'string', 'max:255'],
-            'features.*.icon' => ['required_with:features.*.name', 'string', 'max:100'],
-        ];
+            // Daftarkan Ketua kelompok ke tabel pivot
+            $pivotData[$leaderId] = [
+                'role' => 'ketua',
+                'contribution' => 'Mengkoordinasi tim, merancang arsitektur sistem, dan manajemen repositori.'
+            ];
+
+            // Daftarkan Anggota kelompok ke tabel pivot
+            foreach ($teamMembers as $member) {
+                $pivotData[$member->id] = [
+                    'role' => 'anggota',
+                    'contribution' => 'Mengembangkan modul fitur, menyusun dokumentasi, dan melakukan testing UI/UX.'
+                ];
+            }
+
+            // Sinkronisasi data tim ke relation table
+            $project->teamMembers()->sync($pivotData);
+
+            // 3. Pasangkan Tags Teknologi secara acak
+            if ($tags->isNotEmpty()) {
+                $project->tags()->attach(
+                    $tags->random(rand(1, min(4, $tags->count())))->pluck('id')->toArray()
+                );
+            }
+        }
     }
 }

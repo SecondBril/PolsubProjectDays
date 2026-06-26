@@ -42,7 +42,7 @@ class CourseController extends Controller
     public function store(CourseRequest $request)
     {
         Course::create($request->validated());
-        return redirect()->route('courses.index')->with('success', 'Mata Kuliah ditambahkan.');
+        return redirect()->route('admin.academic.index')->with('success', 'Mata Kuliah ditambahkan.');
     }
 
     public function show(Course $course)
@@ -64,7 +64,7 @@ class CourseController extends Controller
     public function update(CourseRequest $request, Course $course)
     {
         $course->update($request->validated());
-        return redirect()->route('courses.index')->with('success', 'Mata Kuliah diperbarui.');
+        return redirect()->route('admin.academic.index')->with('success', 'Mata Kuliah diperbarui.');
     }
 
     public function destroy(Course $course)

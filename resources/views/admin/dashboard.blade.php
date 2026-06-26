@@ -134,7 +134,9 @@
                                 <tr class="hover:bg-surface transition-colors">
                                     <td class="p-[13px_20px] text-xs">
                                         <div class="flex items-center gap-[11px]">
-                                            <img src="{{ $project->thumbnail_url ?: asset('images/default-thumbnail.png') }}" class="w-[38px] h-[38px] rounded-lg object-cover bg-teal-50" alt="Thumbnail">
+                                            <img src="{{ $project->getFirstMediaUrl('thumbnail', 'card-thumbnail') ?: ($project->getFirstMediaUrl('thumbnail') ?: asset('images/default-thumbnail.png')) }}"
+                                                class="w-[38px] h-[38px] rounded-lg object-cover bg-teal-50"
+                                                alt="Thumbnail">
                                             <div>
                                                 <div class="font-semibold text-textCustom-900 text-sm truncate max-w-[180px]">{{ $project->title }}</div>
                                                 <div class="text-[11.5px] text-textCustom-400">Oleh: {{ $project->team_name ?? 'Individual' }}</div>

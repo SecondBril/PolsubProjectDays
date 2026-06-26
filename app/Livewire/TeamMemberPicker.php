@@ -10,11 +10,20 @@ class TeamMemberPicker extends Component
     public $search = '';
     public $selectedMembers = [];
 
+    // 1. Tambahkan properti untuk mengikat kontribusi ketua tim
+    public $leaderContribution = '';
+
+    // 2. Tangkap data prefill kontribusi ketua melalui parameter mount
+    public function mount($selectedMembers = [], $leaderContribution = '')
+    {
+        $this->selectedMembers = old('team_members', $selectedMembers);
+        $this->leaderContribution = old('leader_contribution', $leaderContribution);
+    }
+
     public function render()
     {
         $searchResults = [];
         if (strlen($this->search) >= 2) {
-            // KUNCI UTAMA: Filter role mahasiswa, lalu kelompokkan OR pencariannya
             $searchResults = User::where('role', 'mahasiswa')
                 ->where(function ($query) {
                     $query->where('nim_nidn', 'like', '%' . $this->search . '%')
@@ -24,7 +33,6 @@ class TeamMemberPicker extends Component
                 ->get();
         }
 
-        // Memanggil berkas view di resources/views/livewire/team-member-picker.blade.php
         return view('livewire.team-member-picker', [
             'searchResults' => $searchResults
         ]);
@@ -38,7 +46,7 @@ class TeamMemberPicker extends Component
                 'id' => $user->id,
                 'name' => $user->name,
                 'nim_nidn' => $user->nim_nidn,
-                'contribution' => '' // Sediakan key kontribusi kosong untuk diisi di form
+                'contribution' => ''
             ];
         }
         $this->search = '';
@@ -48,6 +56,7 @@ class TeamMemberPicker extends Component
     {
         $this->selectedMembers = collect($this->selectedMembers)
             ->filter(fn($member) => $member['id'] !== $userId)
+            ->values()
             ->toArray();
     }
 }

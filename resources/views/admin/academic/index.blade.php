@@ -91,7 +91,6 @@
                             <th class="py-3.5 px-5">Nama Semester</th>
                             <th class="py-3.5 px-5">Tahun Akademik</th>
                             <th class="py-3.5 px-5">Sesi Term</th>
-                            <th class="py-3.5 px-5 text-center w-24">Status</th>
                             <th class="py-3.5 px-5 text-right w-24">Aksi</th>
                         </tr>
                     </thead>
@@ -101,13 +100,13 @@
                                 <td class="py-4 px-5 font-semibold text-sm text-slate-900">{{ $sem->name }}</td>
                                 <td class="py-4 px-5 font-mono text-slate-700">{{ $sem->year }}/{{ $sem->year + 1 }}</td>
                                 <td class="py-4 px-5"><span class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $sem->term === 'Ganjil' ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-purple-50 text-purple-600 border-purple-200' }}">{{ $sem->term }}</span></td>
-                                <td class="py-4 px-5 text-center">
+                                {{-- <td class="py-4 px-5 text-center">
                                     @if($sem->is_active)
                                         <span class="inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold bg-teal-500/10 text-teal-600 border border-teal-500/20">Aktif</span>
                                     @else
                                         <span class="inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200">Arsip</span>
                                     @endif
-                                </td>
+                                </td> --}}
                                 <td class="py-4 px-5 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <button type="button" @click="currentData = {{ json_encode($sem) }}; openEditModal = true" class="p-1.5 bg-slate-100 text-slate-600 border border-slate-200 rounded-md hover:bg-navy-900 hover:text-white transition-all"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -179,71 +178,161 @@
         {{-- MODAL GLOBAL CONTAINER: TAMBAH DATA (CREATE)                       --}}
         {{-- ================================================================== --}}
         <div class="fixed inset-0 bg-navy-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200" x-show="openCreateModal" style="display: none;">
-            <div class="bg-white rounded-2xl border border-slate-200 max-w-md overflow-hidden shadow-2xl" @click.away="openCreateModal = false">
+            <div class="bg-white rounded-2xl border border-slate-200 w-full max-w-md overflow-hidden shadow-2xl transition-all" @click.away="openCreateModal = false">
+
+                {{-- HEADER MODAL DENGAN INDIKATOR TAB KONTEKSTUAL --}}
                 <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                    <h3 class="font-bold text-base text-slate-900 uppercase tracking-tight text-xs text-slate-500">
-                        Form <span x-text="currentTab"></span> Baru
-                    </h3>
-                    <button type="button" @click="openCreateModal = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                    <div>
+                        <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wide">
+                            Tambah <span x-text="currentTab === 'courses' ? 'Mata Kuliah' : (currentTab === 'semesters' ? 'Semester' : 'Kelas Kuliah')"></span> Baru
+                        </h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Lengkapi formulir di bawah ini dengan data yang valid.</p>
+                    </div>
+                    <button type="button" @click="openCreateModal = false" class="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-200/60 rounded-lg transition-colors">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
                 </div>
 
-                {{-- SUB-FORM INDEPENDEN MATA KULIAH --}}
+                {{-- ================================================================== --}}
+                {{-- 1. FORM CREATE: MATA KULIAH                                       --}}
+                {{-- ================================================================== --}}
                 <form method="POST" action="{{ route('admin.courses.store') }}" x-show="currentTab === 'courses'" class="p-5 space-y-4">
                     @csrf
+
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Program Studi</label>
-                        <select name="program_id" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500">
-                            @foreach($programs as $program) <option value="{{ $program->id }}">{{ $program->name }}</option> @endforeach
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Program Studi <span class="text-rose-500">*</span></label>
+                        <select name="program_id" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                            <option value="" disabled selected>-- Pilih Program Studi --</option>
+                            @foreach($programs as $program)
+                                <option value="{{ $program->id }}">{{ $program->name }}</option>
+                            @endforeach
                         </select>
                     </div>
+
                     <div class="grid grid-cols-3 gap-3">
-                        <input type="text" name="code" required placeholder="KODE MK" class="col-span-1 border border-slate-200 rounded-lg px-3 py-2 text-xs uppercase">
-                        <input type="text" name="name" required placeholder="Nama Mata Kuliah" class="col-span-2 border border-slate-200 rounded-lg px-3 py-2 text-xs">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kode MK <span class="text-rose-500">*</span></label>
+                            <input type="text" name="code" required placeholder="INF201" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs uppercase outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Mata Kuliah <span class="text-rose-500">*</span></label>
+                            <input type="text" name="name" required placeholder="Pemrograman Web Lanjut" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
                     </div>
-                    <input type="number" name="sks" min="1" max="6" value="2" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs">
-                    <textarea name="description" placeholder="Deskripsi mata kuliah..." rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs resize-none"></textarea>
-                    <div class="flex justify-end gap-2 pt-2"><button type="submit" class="px-4 py-2 bg-teal-500 text-white font-semibold rounded-lg text-xs">Simpan MK</button></div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Bobot SKS <span class="text-rose-500">*</span></label>
+                        <input type="number" name="sks" min="1" max="6" value="2" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        <span class="text-[10px] text-slate-400 mt-1 block">Batas beban sks minimum 1 dan maksimum 6.</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Deskripsi Mata Kuliah</label>
+                        <textarea name="description" placeholder="Uraikan deskripsi singkat mengenai silabus atau capaian mata kuliah..." rows="3" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs resize-none outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                        <button type="button" @click="openCreateModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs transition-colors">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg text-xs shadow-sm transition-colors">Simpan MK</button>
+                    </div>
                 </form>
 
-                {{-- SUB-FORM INDEPENDEN SEMESTER --}}
+                {{-- ================================================================== --}}
+                {{-- 2. FORM CREATE: SEMESTER                                          --}}
+                {{-- ================================================================== --}}
                 <form method="POST" action="{{ route('admin.semesters.store') }}" x-show="currentTab === 'semesters'" style="display: none;" class="p-5 space-y-4">
                     @csrf
-                    <input type="text" name="name" required placeholder="Nama Kalender (Contoh: Ganjil 2026/2027)" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs">
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="number" name="year" value="{{ date('Y') }}" required class="border border-slate-200 rounded-lg px-3 py-2 text-xs">
-                        <select name="term" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs">
-                            <option value="Ganjil">Ganjil</option><option value="Genap">Genap</option>
-                        </select>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Kalender Semester <span class="text-rose-500">*</span></label>
+                        <input type="text" name="name" required placeholder="Ganjil 2026/2027" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        <span class="text-[10px] text-slate-400 mt-1 block">Format baku rekomendasi: [Ganjil/Genap] [Tahun Akademik]</span>
                     </div>
+
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="date" name="start_date" required class="border border-slate-200 rounded-lg px-3 py-2 text-xs">
-                        <input type="date" name="end_date" required class="border border-slate-200 rounded-lg px-3 py-2 text-xs">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tahun Akademik <span class="text-rose-500">*</span></label>
+                            <input type="number" name="year" value="{{ date('Y') }}" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Sesi Term <span class="text-rose-500">*</span></label>
+                            <select name="term" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                                <option value="Ganjil">Ganjil</option>
+                                <option value="Genap">Genap</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="flex justify-end gap-2 pt-2"><button type="submit" class="px-4 py-2 bg-teal-500 text-white font-semibold rounded-lg text-xs">Simpan Semester</button></div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Mulai Kuliah <span class="text-rose-500">*</span></label>
+                            <input type="date" name="start_date" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Selesai <span class="text-rose-500">*</span></label>
+                            <input type="date" name="end_date" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                        <button type="button" @click="openCreateModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs transition-colors">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg text-xs shadow-sm transition-colors">Simpan Semester</button>
+                    </div>
                 </form>
 
-                {{-- SUB-FORM INDEPENDEN KELAS KULIAH --}}
+                {{-- ================================================================== --}}
+                {{-- 3. FORM CREATE: KELAS KULIAH                                      --}}
+                {{-- ================================================================== --}}
                 <form method="POST" action="{{ route('admin.course-classes.store') }}" x-show="currentTab === 'classes'" style="display: none;" class="p-5 space-y-4">
                     @csrf
+
                     <div class="grid grid-cols-2 gap-3">
-                        <select name="course_id" required class="border border-slate-200 rounded-lg px-3 py-2 text-xs">
-                            @foreach($courses as $course) <option value="{{ $course->id }}">{{ $course->name }}</option> @endforeach
-                        </select>
-                        <input type="text" name="class_code" required placeholder="Kode Rombel (TRPL 3A)" class="border border-slate-200 rounded-lg px-3 py-2 text-xs">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Mata Kuliah <span class="text-rose-500">*</span></label>
+                            <select name="course_id" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                                <option value="" disabled selected>-- Pilih MK --</option>
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}">{{ $course->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kode Rombel Kelas <span class="text-rose-500">*</span></label>
+                            <input type="text" name="class_code" required placeholder="TRPL 3A" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
                     </div>
-                    <select name="semester_id" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs">
-                        @foreach($semesters as $semester) <option value="{{ $semester->id }}">{{ $semester->name }}</option> @endforeach
-                    </select>
+
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Dosen Pengampu (Team Teaching)</label>
-                        <div class="border border-slate-200 rounded-lg p-2.5 bg-slate-50 max-h-32 overflow-y-auto space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Periode Semester Berlaku <span class="text-rose-500">*</span></label>
+                        <select name="semester_id" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                            <option value="" disabled selected>-- Pilih Semester Aktif --</option>
+                            @foreach($semesters as $semester)
+                                <option value="{{ $semester->id }}">{{ $semester->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Dosen Pengampu (Team Teaching)</label>
+                            <span class="text-[10px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 font-medium">Bisa pilih multi-dosen</span>
+                        </div>
+                        <div class="border border-slate-200 rounded-lg p-2.5 bg-slate-50/60 max-h-36 overflow-y-auto space-y-2 focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500 transition-all">
                             @foreach($lecturers as $lecturer)
-                                <label class="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer"><input type="checkbox" name="lecturer_ids[]" value="{{ $lecturer->id }}" class="rounded text-teal-500 focus:ring-0"><span>{{ $lecturer->name }}</span></label>
+                                <label class="flex items-center gap-2.5 text-xs font-medium text-slate-700 cursor-pointer hover:bg-slate-200/40 p-1 rounded transition-colors select-none">
+                                    <input type="checkbox" name="lecturer_ids[]" value="{{ $lecturer->id }}" class="rounded text-teal-500 focus:ring-0 cursor-pointer h-3.5 w-3.5 border-slate-300">
+                                    <span>{{ $lecturer->name }}</span>
+                                </label>
                             @endforeach
                         </div>
                     </div>
-                    <div class="flex justify-end gap-2 pt-2"><button type="submit" class="px-4 py-2 bg-teal-500 text-white font-semibold rounded-lg text-xs">Buka Kelas</button></div>
+
+                    <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                        <button type="button" @click="openCreateModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs transition-colors">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg text-xs shadow-sm transition-colors">Buka Kelas</button>
+                    </div>
                 </form>
+
             </div>
         </div>
 
@@ -251,71 +340,166 @@
         {{-- MODAL GLOBAL CONTAINER: UBAH DATA (EDIT)                           --}}
         {{-- ================================================================== --}}
         <div class="fixed inset-0 bg-navy-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200" x-show="openEditModal" style="display: none;">
-            <div class="bg-white rounded-2xl border border-slate-200 max-w-md overflow-hidden shadow-2xl" @click.away="openEditModal = false">
+            <div class="bg-white rounded-2xl border border-slate-200 w-full max-w-md overflow-hidden shadow-2xl transition-all" @click.away="openEditModal = false">
+
+                {{-- HEADER MODAL DENGAN DETAIL KELAS KONTEKS --}}
                 <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                    <h3 class="font-bold text-base text-slate-900 text-xs text-slate-500 uppercase">Ubah Data <span x-text="currentTab"></span></h3>
-                    <button type="button" @click="openEditModal = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                    <div>
+                        <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wide">
+                            Ubah Data <span x-text="currentTab === 'courses' ? 'Mata Kuliah' : (currentTab === 'semesters' ? 'Semester' : 'Kelas Kuliah')"></span>
+                        </h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Perbarui informasi pada field yang diperlukan di bawah ini.</p>
+                    </div>
+                    <button type="button" @click="openEditModal = false" class="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-200/60 rounded-lg transition-colors">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
                 </div>
 
-                {{-- FORM EDIT MATA KULIAH --}}
+                {{-- ================================================================== --}}
+                {{-- 1. FORM EDIT: MATA KULIAH                                         --}}
+                {{-- ================================================================== --}}
                 <form method="POST" :action="`{{ url('admin/courses') }}/${currentData.id}`" x-show="currentTab === 'courses'" class="p-5 space-y-4">
                     @csrf @method('PUT')
-                    <input type="text" name="name" :value="currentData.name" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs">
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="text" name="code" :value="currentData.code" required class="border border-slate-200 rounded-lg px-3 py-2 text-xs uppercase">
-                        <input type="number" name="sks" :value="currentData.sks" required class="border border-slate-200 rounded-lg px-3 py-2 text-xs">
-                    </div>
-                    <textarea name="description" :value="currentData.description" rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs resize-none"></textarea>
-                    <button type="submit" class="w-full py-2 bg-teal-500 text-white font-bold rounded-lg text-xs">Simpan Perubahan</button>
-                </form>
-
-                {{-- FORM EDIT SEMESTER --}}
-                <form method="POST" :action="`{{ url('admin/semesters') }}/${currentData.id}`" x-show="currentTab === 'semesters'" style="display: none;" class="p-5 space-y-4">
-                    @csrf @method('PUT')
-                    <input type="text" name="name" :value="currentData.name" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs">
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="number" name="year" :value="currentData.year" required class="border border-slate-200 rounded-lg px-3 py-2 text-xs">
-                        <select name="term" x-model="currentData.term" class="border border-slate-200 rounded-lg px-3 py-2 text-xs"><option value="Ganjil">Ganjil</option><option value="Genap">Genap</option></select>
-                    </div>
-                    <button type="submit" class="w-full py-2 bg-teal-500 text-white font-bold rounded-lg text-xs">Simpan Perubahan</button>
-                </form>
-
-                {{-- FORM EDIT KELAS KULIAH --}}
-                <form method="POST" :action="`{{ url('admin/course-classes') }}/${currentData.id}`" x-show="currentTab === 'classes'" style="display: none;" class="p-5 space-y-4">
-                    @csrf @method('PUT')
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Mata Kuliah</label>
-                            <select name="course_id" :value="currentData.course_id" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500">
-                                @foreach($courses as $course) <option value="{{ $course->id }}">{{ $course->name }}</option> @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Kode Ruang Rombel</label>
-                            {{-- Menggunakan currentData.class_code agar sinkron dengan container utama --}}
-                            <input type="text" name="class_code" :value="currentData.class_code" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500">
-                        </div>
-                    </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Periode Semester</label>
-                        <select name="semester_id" :value="currentData.semester_id" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500">
-                            @foreach($semesters as $semester) <option value="{{ $semester->id }}">{{ $semester->name }}</option> @endforeach
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Program Studi <span class="text-rose-500">*</span></label>
+                        <select name="program_id" x-model="currentData.program_id" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                            @foreach($programs as $program)
+                                <option value="{{ $program->id }}">{{ $program->name }}</option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Dosen Pengampu (Team Teaching)</label>
-                        <div class="border border-slate-200 rounded-lg p-2.5 bg-slate-50 max-h-32 overflow-y-auto space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Mata Kuliah <span class="text-rose-500">*</span></label>
+                        <input type="text" name="name" x-model="currentData.name" required placeholder="Masukkan nama mata kuliah" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kode MK <span class="text-rose-500">*</span></label>
+                            <input type="text" name="code" x-model="currentData.code" required placeholder="KODE MK" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs uppercase outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Bobot SKS <span class="text-rose-500">*</span></label>
+                            <input type="number" name="sks" x-model="currentData.sks" min="1" max="6" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Deskripsi Mata Kuliah</label>
+                        <textarea name="description" x-model="currentData.description" placeholder="Deskripsi mata kuliah..." rows="3" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs resize-none outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                        <button type="button" @click="openEditModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs transition-colors">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg text-xs shadow-sm transition-colors">Simpan Perubahan</button>
+                    </div>
+                </form>
+
+                {{-- ================================================================== --}}
+                {{-- 2. FORM EDIT: SEMESTER                                            --}}
+                {{-- ================================================================== --}}
+                <form method="POST" :action="`{{ url('admin/semesters') }}/${currentData.id}`" x-show="currentTab === 'semesters'" style="display: none;" class="p-5 space-y-4"
+                    x-init="$watch('currentData', value => {
+                        if (value && value.start_date && value.start_date.includes(' ')) {
+                            currentData.start_date = value.start_date.split(' ')[0];
+                        }
+                        if (value && value.end_date && value.end_date.includes(' ')) {
+                            currentData.end_date = value.end_date.split(' ')[0];
+                        }
+                    })">
+                    @csrf @method('PUT')
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Semester <span class="text-rose-500">*</span></label>
+                        <input type="text" name="name" x-model="currentData.name" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tahun <span class="text-rose-500">*</span></label>
+                            <input type="number" name="year" x-model="currentData.year" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Term <span class="text-rose-500">*</span></label>
+                            <select name="term" x-model="currentData.term" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                                <option value="Ganjil">Ganjil</option>
+                                <option value="Genap">Genap</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Mulai <span class="text-rose-500">*</span></label>
+                            <input type="date" name="start_date" x-model="currentData.start_date" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Selesai <span class="text-rose-500">*</span></label>
+                            <input type="date" name="end_date" x-model="currentData.end_date" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                        <button type="button" @click="openEditModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs transition-colors">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg text-xs shadow-sm transition-colors">Simpan Perubahan</button>
+                    </div>
+                </form>
+
+                {{-- ================================================================== --}}
+                {{-- 3. FORM EDIT: KELAS KULIAH                                        --}}
+                {{-- ================================================================== --}}
+                <form method="POST" :action="`{{ url('admin/course-classes') }}/${currentData.id}`" x-show="currentTab === 'classes'" style="display: none;" class="p-5 space-y-4">
+                    @csrf @method('PUT')
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Mata Kuliah <span class="text-rose-500">*</span></label>
+                            <select name="course_id" x-model="currentData.course_id" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}">{{ $course->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kode Ruang Rombel <span class="text-rose-500">*</span></label>
+                            <input type="text" name="class_code" x-model="currentData.class_code" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Periode Semester <span class="text-rose-500">*</span></label>
+                        <select name="semester_id" x-model="currentData.semester_id" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow">
+                            @foreach($semesters as $semester)
+                                <option value="{{ $semester->id }}">{{ $semester->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Dosen Pengampu (Team Teaching)</label>
+                        </div>
+                        <div class="border border-slate-200 rounded-lg p-2.5 bg-slate-50 max-h-36 overflow-y-auto space-y-2 focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500 transition-all">
                             @foreach($lecturers as $lecturer)
-                                <label class="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer select-none">
-                                    <input type="checkbox" name="lecturer_ids[]" value="{{ $lecturer->id }}" :checked="lecturer_ids.includes({{ $lecturer->id }})" class="rounded text-teal-500 focus:ring-0">
+                                <label class="flex items-center gap-2.5 text-xs font-medium text-slate-700 cursor-pointer hover:bg-slate-200/40 p-1 rounded transition-colors select-none">
+                                    <input type="checkbox"
+                                        name="lecturer_ids[]"
+                                        value="{{ $lecturer->id }}"
+                                        :checked="lecturer_ids.includes({{ $lecturer->id }}) || lecturer_ids.includes('{{ $lecturer->id }}')"
+                                        @change="if($event.target.checked) { if(!lecturer_ids.includes($event.target.value)) lecturer_ids.push($event.target.value) } else { lecturer_ids = lecturer_ids.filter(id => id != $event.target.value) }"
+                                        class="rounded text-teal-500 focus:ring-0 cursor-pointer h-3.5 w-3.5 border-slate-300">
                                     <span>{{ $lecturer->name }}</span>
                                 </label>
                             @endforeach
                         </div>
                     </div>
-                    <button type="submit" class="w-full py-2 bg-teal-500 text-white font-bold rounded-lg text-xs shadow-sm hover:bg-teal-600 transition-colors">Simpan Perubahan</button>
+
+                    <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                        <button type="button" @click="openEditModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs transition-colors">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg text-xs shadow-sm transition-colors">Simpan Perubahan</button>
+                    </div>
                 </form>
             </div>
         </div>

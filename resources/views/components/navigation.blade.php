@@ -4,7 +4,7 @@
         {{-- BRAND LOGO --}}
         <a href="/" class="text-base font-black tracking-tight text-navy-900 flex items-center gap-2 outline-none">
             <span class="w-2.5 h-5 bg-navy-800 rounded-sm inline-block sm:hidden"></span>
-            JTIK POLSUB
+            POLS-HUB JTIK
         </a>
 
         {{-- DESKTOP NAVIGATION --}}
@@ -98,21 +98,25 @@
             @endauth
         </div>
 
-        {{-- MOBILE HAMBURGER BUTTON --}}
-        <button @click="mobileOpen = !mobileOpen" class="text-slate-600 md:hidden p-1 rounded-lg hover:bg-slate-100 focus:outline-none transition-colors">
-            {{-- Menggunakan SVG dinamis yang berubah jadi silang 'X' saat menu mobile terbuka --}}
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path x-show="!mobileOpen" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                <path x-show="mobileOpen" x-cloak stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-        </button>
+        {{-- MOBILE UTILITIES (HAMBURGER & NOTIFICATION) --}}
+        <div class="flex items-center gap-3 md:hidden">
+            @auth
+                {{-- PENDEKATAN A: Notifikasi ditaruh di sini agar selalu terlihat di luar --}}
+                <div class="scale-90 origin-right">
+                    <x-notification-bell />
+                </div>
+            @endauth
+
+            <button @click="mobileOpen = !mobileOpen" class="text-slate-600 p-1 rounded-lg hover:bg-slate-100 focus:outline-none transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path x-show="!mobileOpen" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    <path x-show="mobileOpen" x-cloak stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
     </div>
 
-    {{-- ================================================================== --}}
-    {{-- MOBILE NAVIGATION PANEL (ABSOLUTE DROPDOWN LOCK)                  --}}
-    {{-- ================================================================== --}}
-    {{-- Menggunakan posisi 'absolute' agar ketika terbuka, dia mengambang di atas konten --}}
-    {{-- dan TIDAK AKAN menggeser elemen/halaman di bawahnya ke dasar layar. --}}
+    {{-- MOBILE NAVIGATION PANEL --}}
     <div x-show="mobileOpen"
          x-cloak
          x-transition:enter="transition ease-out duration-200"
@@ -153,15 +157,20 @@
 
         <div class="border-t border-slate-100 pt-3">
             @auth
-                {{-- Panel Informasi Pengguna Mobile yang Lebih Premium --}}
-                <div class="flex items-center gap-3 px-3 py-2 bg-slate-50 rounded-xl mb-2 border border-slate-100">
-                    <div class="w-8 h-8 rounded-full bg-navy-900 text-white flex items-center justify-center font-mono text-xs font-bold uppercase shrink-0">
-                        {{ substr(Auth::user()->name, 0, 2) }}
+                {{-- Panel Informasi Pengguna Mobile --}}
+                <div class="flex items-center justify-between px-3 py-2 bg-slate-50 rounded-xl mb-2 border border-slate-100">
+                    <div class="flex items-center gap-3 truncate">
+                        <div class="w-8 h-8 rounded-full bg-navy-900 text-white flex items-center justify-center font-mono text-xs font-bold uppercase shrink-0">
+                            {{ substr(Auth::user()->name, 0, 2) }}
+                        </div>
+                        <div class="flex flex-col truncate">
+                            <span class="text-xs font-bold text-slate-800 truncate">{{ Auth::user()->name }}</span>
+                            <span class="text-[10px] font-mono text-slate-400 truncate">{{ Auth::user()->email }}</span>
+                        </div>
                     </div>
-                    <div class="flex flex-col truncate">
-                        <span class="text-xs font-bold text-slate-800 truncate">{{ Auth::user()->name }}</span>
-                        <span class="text-[10px] font-mono text-slate-400 truncate">{{ Auth::user()->email }}</span>
-                    </div>
+
+                    {{-- PENDEKATAN B: Jika ingin di dalam dropdown juga ada, hapus komen di bawah ini --}}
+                    {{-- <div class="shrink-0"><x-notification-bell /></div> --}}
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">

@@ -26,7 +26,10 @@ class ProjectController extends Controller
 
     public function index(Request $request)
     {
-        $query = Project::with(['program', 'category', 'courseClass.course', 'teamMembers']);
+        $query = Project::with(['program', 'category' => function ($q) {
+                $q->where('is_active', true);
+            },
+        'courseClass.course', 'teamMembers']);
 
         /** @var User|null $user */
         $user = Auth::user();
@@ -50,8 +53,10 @@ class ProjectController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('team_name', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                ->orWhere('team_name', 'like', '%' . $request->search . '%');
+            });
         }
 
         $projects = $query->latest()->paginate(12)->withQueryString();
@@ -166,10 +171,6 @@ class ProjectController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        if ($user instanceof User && $user->hasRole('mahasiswa') && $project->team_lead_id !== $user->id) {
-            abort(403, 'Anda tidak memiliki izin untuk mengubah proyek ini.');
-        }
-
         return DB::transaction(function () use ($request, $project, $user) {
             $data = $request->validated();
             $isAdmin = $user->hasAnyRole(['admin', 'dosen']);
@@ -177,12 +178,6 @@ class ProjectController extends Controller
             // Jika admin mengubah ketua tim secara manual
             if ($isAdmin && $request->filled('team_lead_id')) {
                 $data['team_lead_id'] = $request->team_lead_id;
-            }
-
-            // Jika mahasiswa mengedit project yang sudah published, kembalikan ke pending
-            if ($user instanceof User && $user->hasRole('mahasiswa') && $project->status === 'published') {
-                $data['status'] = 'pending';
-                $data['submitted_at'] = now();
             }
 
             $project->update($data);
@@ -258,7 +253,7 @@ class ProjectController extends Controller
                                  ->with('success', 'Proyek mahasiswa berhasil diperbarui oleh manajemen.');
             }
 
-            return redirect()->route('projects.show', $project)
+            return redirect()->route('projects.index', $project)
                              ->with('success', 'Proyek berhasil diperbarui.');
         });
     }
@@ -294,7 +289,9 @@ class ProjectController extends Controller
     public function show(Project $project, ProjectViewTracker $tracker, Request $request)
     {
         $project->load([
-            'program', 'category', 'courseClass.course', 'courseClass.lecturers',
+            'program','category' => function ($q) {
+                $q->where('is_active', true);
+            }, 'courseClass.course', 'courseClass.lecturers',
             'teamMembers', 'tags', 'media', 'features'
         ]);
 
@@ -367,7 +364,7 @@ class ProjectController extends Controller
         ];
 
         $programs = Program::all();
-        $categories = Category::all();
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
         $courseClasses = CourseClass::with(['course', 'semester'])->get();
         $tags = Tag::all();
 
@@ -441,13 +438,9 @@ class ProjectController extends Controller
             'fa-solid fa-cow', 'fa-solid fa-cloud-sun-rain', 'fa-solid fa-faucet-drip', 'fa-solid fa-bug-ant'
         ];
 
-        // Proteksi barikade: Mahasiswa tidak boleh mengedit proyek kelompok lain
-        if ($user->hasRole('mahasiswa') && $project->team_lead_id !== $user->id) {
-            abort(403, 'Anda tidak memiliki izin untuk mengubah proyek ini.');
-        }
 
         $programs = Program::all();
-        $categories = Category::all();
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
         $courseClasses = CourseClass::with(['course', 'semester'])->get();
         $tags = Tag::all();
 

@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot:title>{{ $project->title }} — JTIK POLSUB Showcase</x-slot:title>
+    <x-slot:title>{{ $project->title }} — POLS-HUB JTIK Showcase</x-slot:title>
 
     <section class="relative h-[420px] w-full overflow-hidden">
         <img src="{{ $project->getFirstMediaUrl('thumbnail', 'detail-image') ?: ($project->getFirstMediaUrl('thumbnail') ?: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200&auto=format&fit=crop') }}"

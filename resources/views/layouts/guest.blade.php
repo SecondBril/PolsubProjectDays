@@ -26,7 +26,7 @@
             </div>
 
             <p class="mt-8 text-center text-xs text-slate-400">
-                &copy; {{ date('Y') }} JTIK POLSUB Showcase. All rights reserved.
+                &copy; {{ date('Y') }} POLS-HUB JTIK Showcase. All rights reserved.
             </p>
         </div>
     </body>

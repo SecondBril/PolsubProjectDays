@@ -55,7 +55,7 @@ class CourseClassController extends Controller
                 $courseClass->lecturers()->sync($request->lecturer_ids);
             }
 
-            return redirect()->route('admin.course-classes.index')->with('success', 'Kelas dan tim dosen pengampu pengampu berhasil dibuat.');
+            return redirect()->route('admin.academic.index')->with('success', 'Kelas dan tim dosen pengampu pengampu berhasil dibuat.');
         });
     }
 
@@ -72,7 +72,7 @@ class CourseClassController extends Controller
                 $courseClass->lecturers()->sync($request->lecturer_ids);
             }
 
-            return redirect()->route('admin.course-classes.index')->with('success', 'Data kelas dan tim dosen berhasil diperbarui.');
+            return redirect()->route('admin.academic.index')->with('success', 'Data kelas dan tim dosen berhasil diperbarui.');
         });
     }
 
@@ -87,6 +87,6 @@ class CourseClassController extends Controller
     public function destroy(CourseClass $course_class)
     {
         $course_class->delete();
-        return redirect()->route('course-classes.index')->with('success', 'Kelas dihapus.');
+        return redirect()->route('admin.academic.index')->with('success', 'Kelas dihapus.');
     }
 }

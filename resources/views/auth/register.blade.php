@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="mb-6 text-center">
         <a href="/" class="inline-block text-2xl font-extrabold tracking-tight text-navy-900">
-            JTIK POLSUB
+            POLS-HUB JTIK
         </a>
         <h2 class="mt-4 text-xl font-bold text-navy-900">Buat Akun Showcase</h2>
         <p class="mt-1 text-sm text-slate-500">Daftarkan diri Anda untuk memamerkan karya PBL.</p>

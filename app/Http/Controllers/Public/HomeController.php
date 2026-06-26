@@ -31,7 +31,9 @@ class HomeController extends Controller
         $featuredProjects = Cache::remember(CacheKeys::HOME_FEATURED, CacheKeys::TTL_SHORT, function () {
             return Project::published()
                 ->featured()
-                ->with(['program', 'category', 'teamMembers'])
+                ->with(['program', 'category' => function ($q) {
+                $q->where('is_active', true);
+            }, 'teamMembers'])
                 ->limit(6)
                 ->get()
                 ->map(function ($project) {
@@ -45,7 +47,9 @@ class HomeController extends Controller
         // 3. Cache Latest Projects juga dirubah menjadi ARRAY MURNI
         $latestProjects = Cache::remember(CacheKeys::HOME_LATEST, CacheKeys::TTL_SHORT, function () {
             return Project::published()
-                ->with(['program', 'category', 'teamMembers'])
+                ->with(['program', 'category' => function ($q) {
+                $q->where('is_active', true);
+            }, 'teamMembers'])
                 ->latest('published_at')
                 ->limit(3)
                 ->get()

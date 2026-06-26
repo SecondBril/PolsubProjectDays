@@ -22,8 +22,6 @@ class ProjectControllerr extends Controller
         if ($request->filled('search')) {
             $query->search($request->input('search'));
         }
-
-        // ... Sisa kode filter, sorting, dan pagination tetap sama ...
         if ($request->filled('program_id')) {
             $query->where('program_id', $request->input('program_id'));
         }
@@ -52,12 +50,12 @@ class ProjectControllerr extends Controller
             default      => $query->latest('published_at'),
         };
 
-        $projects = $query->paginate(12)->withQueryString();
+        $projects = $query->paginate(15)->withQueryString();
 
         $filterOptions = [
             'programs'   => Program::where('is_active', true)->orderBy('name')->get(),
             'categories' => Category::where('is_active', true)->orderBy('sort_order')->get(),
-            'semesters'  => Semester::where('is_active', true)->orderByDesc('year')->orderByDesc('term')->get(),
+            'semesters'  => Semester::orderByDesc('year')->orderByDesc('term')->get(),
             'tags'       => Tag::has('projects')->orderBy('name')->get(),
         ];
 
@@ -82,7 +80,7 @@ class ProjectControllerr extends Controller
                 'courseClass.lecturers',
                 'tags',
                 'teamMembers.program',
-                'features' // REVISI: Pastikan detail proyek memuat relasi features
+                'features'
             ])
             ->firstOrFail();
 

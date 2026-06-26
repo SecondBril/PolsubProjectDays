@@ -11,8 +11,9 @@ class SemesterRequest extends FormRequest
 
     public function rules(): array
     {
-        // Ambil ID semester saat ini jika dalam mode UPDATE/EDIT untuk pengecualian
-        $semesterId = $this->route('semester')?->id;
+        // Mengamankan pengambilan ID, baik route menggunakan parameter {semester} atau {id}
+        $semesterParameter = $this->route('semester') ?? $this->route('id');
+        $semesterId = is_object($semesterParameter) ? $semesterParameter->id : $semesterParameter;
 
         return [
             'name' => ['required', 'string', 'max:50'],
@@ -21,7 +22,6 @@ class SemesterRequest extends FormRequest
                 'integer',
                 'min:2020',
                 'max:' . (date('Y') + 2),
-                // VALIDASI KRUSIAL: Cek apakah kombinasi year dan term sudah dipakai
                 Rule::unique('semesters', 'year')->where(function ($query) {
                     return $query->where('term', $this->term);
                 })->ignore($semesterId)

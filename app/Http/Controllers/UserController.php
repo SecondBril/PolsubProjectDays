@@ -33,7 +33,7 @@ class UserController extends Controller
             }
         }
 
-        $users = $query->paginate(15)->withQueryString();
+        $users = $query->paginate(12)->withQueryString();
         $programs = Program::all(); // Diperlukan untuk dropdown pilihan prodi di modal
 
         return view('admin.users.index', compact('users', 'programs'));

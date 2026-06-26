@@ -15,10 +15,11 @@ class Semester extends Model
         'name', 'year', 'term', 'start_date', 'end_date', 'is_active'
     ];
 
+    // Pastikan field tanggal di-cast ke date dengan format yang tepat
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'is_active' => 'boolean',
+        'start_date' => 'date:Y-m-d',
+        'end_date'   => 'date:Y-m-d',
+        'is_active'  => 'boolean',
     ];
 
     public function courseClasses(): HasMany

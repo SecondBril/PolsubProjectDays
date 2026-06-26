@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot:title>Tentang Kami — JTIK POLSUB Showcase</x-slot:title>
+    <x-slot:title>Tentang Kami — POLS-HUB JTIK Showcase</x-slot:title>
 
     {{-- HERO SECTION --}}
     <section class="relative overflow-hidden bg-panel border-b border-borderSoft" style="padding-top: 7rem; padding-bottom: 6rem;">
@@ -12,7 +12,7 @@
             </span>
             <h1 class="text-4xl font-extrabold tracking-tight text-textCustom-900 sm:text-5xl " style="margin-top: 2rem;">
                 Etalase Inovasi & Kreativitas <br/>
-                <span class="bg-gradient-to-r from-navy-700 via-navy-900 to-teal-600 bg-clip-text text-transparent print:text-navy-900">Mahasiswa JTIK POLSUB</span>
+                <span class="bg-gradient-to-r from-navy-700 via-navy-900 to-teal-600 bg-clip-text text-transparent print:text-navy-900">Mahasiswa POLS-HUB JTIK</span>
             </h1>
             <p class="mx-auto max-w-2xl text-lg leading-relaxed text-textCustom-600 print:text-sm" style="margin-top: 1.5rem;">
                 JTIK Showcase menjembatani ide-ide brilian hasil
@@ -79,7 +79,7 @@
         <div class="mx-auto max-w-7xl" style="padding-left: 1.5rem; padding-right: 1.5rem;">
             <div class="text-center max-w-3xl mx-auto">
                 <span class="text-xs font-bold uppercase tracking-widest text-teal-600 block">Pilar Akademik</span>
-                <h2 class="text-3xl font-bold tracking-tight text-textCustom-900 sm:text-4xl print:text-2xl" style="margin-top: 0.75rem;">3 Program Studi di JTIK POLSUB</h2>
+                <h2 class="text-3xl font-bold tracking-tight text-textCustom-900 sm:text-4xl print:text-2xl" style="margin-top: 0.75rem;">3 Program Studi di POLS-HUB JTIK</h2>
                 <p class="text-base text-textCustom-600 print:text-sm" style="margin-top: 1rem;">Kolaborasi lintas disiplin ilmu komputer dan bisnis melahirkan produk digital yang solutif.</p>
             </div>
 

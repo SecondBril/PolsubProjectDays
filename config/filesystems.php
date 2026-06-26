@@ -59,6 +59,13 @@ return [
             'throw' => false,
             'report' => false,
         ],
+        'spatie_public' => [
+            'driver' => 'local',
+            'root'   => base_path('../public_html/media'), // Langsung tembak ke public_html
+            'url'    => env('APP_URL') . '/media',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
 
     ],
 

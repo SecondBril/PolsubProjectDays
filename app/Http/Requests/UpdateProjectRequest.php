@@ -32,7 +32,7 @@ class UpdateProjectRequest extends FormRequest
             'documentation_url' => ['nullable', 'url', 'max:500'],
 
             // --- VALIDASI TIM TERBARU (SAMA DENGAN STORE) ---
-            'team_members' => ['nullable', 'array', 'max:4'],
+            'team_members' => ['required', 'array', 'min:1', 'max:4'],
             'team_members.*.user_id' => [
                 'required',
                 'distinct',
